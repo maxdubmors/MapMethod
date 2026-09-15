@@ -1,38 +1,30 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.mapmethod.android.application)
+    alias(libs.plugins.mapmethod.android.application.compose)
+    alias(libs.plugins.mapmethod.hilt)
 }
 
 android {
-    namespace = "dev.stekl0.mapmethod"
-    compileSdk {
-        version = release(37)
-    }
-
     defaultConfig {
         applicationId = "dev.stekl0.mapmethod"
-        minSdk = 29
-        targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             optimization {
-                enable = false
+                enable = true
             }
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
-    }
+    testOptions.unitTests.isIncludeAndroidResources = true
+    namespace = "dev.stekl0.mapmethod"
 }
 
 dependencies {
