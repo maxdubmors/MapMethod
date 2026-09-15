@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dev.stekl0.mapmethod.ui.theme.MapMethodTheme
 
-class MainActivity : ComponentActivity() {
+public class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(
+private fun Greeting(
     name: String,
     modifier: Modifier = Modifier,
 ) {
