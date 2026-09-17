@@ -16,12 +16,12 @@ public fun MapMethodApp(modifier: Modifier = Modifier) {
     val navigator = rememberNavigator(HomeNavKey)
     val entryProvider =
         entryProvider<NavKey> {
-            entry<HomeNavKey> {
+            entry<HomeNavKey>(clazzContentKey = { "home" }) {
                 HomeScreen(
                     onOpenSecond = { navigator.navigate(SecondNavKey) },
                 )
             }
-            entry<SecondNavKey> {
+            entry<SecondNavKey>(clazzContentKey = { "second" }) {
                 SecondScreen(onBack = navigator::goBack)
             }
         }
