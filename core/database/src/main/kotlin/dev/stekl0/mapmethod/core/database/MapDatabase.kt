@@ -7,7 +7,7 @@ import dev.stekl0.mapmethod.core.database.model.CellEntity
 
 @Database(
     entities = [CellEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 public abstract class MapDatabase : RoomDatabase() {

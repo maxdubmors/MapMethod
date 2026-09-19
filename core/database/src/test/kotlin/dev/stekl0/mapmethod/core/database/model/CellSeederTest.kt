@@ -41,6 +41,19 @@ public class CellSeederTest {
         }
 
     @Test
+    public fun `mask is sixty by sixty over the same bounding box`() {
+        assertEquals(60, PolandMask.rows.size)
+        assertTrue(PolandMask.rows.all { it.length == 60 })
+    }
+
+    @Test
+    public fun `mask holds on the order of two to three thousand cells`() {
+        val total = PolandMask.entities().size
+
+        assertTrue(total in 2000..3000)
+    }
+
+    @Test
     public fun `mask order is dense row-major north to south west to east`() {
         val entities = PolandMask.entities()
 

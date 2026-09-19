@@ -5,9 +5,11 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.toSize
 private val ScreenPadding = 16.dp
 private val ContentSpacing = 12.dp
 private val StepperSpacing = 4.dp
+private val StepperButtonPadding = 8.dp
 private val CellGap = 1.dp
 private val PolandWhite = Color.White
 private val PolandRed = Color(0xFFDC143C)
@@ -62,6 +65,7 @@ public fun MapScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .imePadding()
                 .padding(ScreenPadding),
         verticalArrangement = Arrangement.spacedBy(ContentSpacing),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -162,9 +166,10 @@ private fun StepperButton(step: Int, current: Int?, remaining: Int, enabled: Boo
     OutlinedButton(
         onClick = { onStep(stepLogCount(current = current, step = step, remaining = remaining)) },
         enabled = enabled,
+        contentPadding = PaddingValues(horizontal = StepperButtonPadding),
         modifier = Modifier.testTag(tag),
     ) {
-        Text(text = label)
+        Text(text = label, maxLines = 1)
     }
 }
 
