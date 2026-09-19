@@ -33,8 +33,6 @@ rootProject.name = "mapmethod"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
 include(":core:navigation")
-include(":feature:second:api")
-include(":feature:second:impl")
 
 check(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
     """
