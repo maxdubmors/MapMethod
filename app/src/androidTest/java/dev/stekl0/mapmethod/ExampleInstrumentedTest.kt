@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("dev.stekl0.mapmethod", appContext.packageName)
+        assertEquals("dev.stekl0.mapmethod.debug", appContext.packageName)
     }
 }
