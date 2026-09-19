@@ -23,13 +23,16 @@ import androidx.compose.ui.unit.dp
 private val ScreenPadding = 16.dp
 private val ContentSpacing = 12.dp
 private val CellGap = 1.dp
+private val PolandWhite = Color.White
+private val PolandRed = Color(0xFFDC143C)
 
 @Composable
 public fun MapScreen(
-    modifier: Modifier = Modifier,
     state: MapUiState,
     onLogClick: () -> Unit,
-    filledColor: Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier,
+    northernColor: Color = PolandWhite,
+    southernColor: Color = PolandRed,
     emptyColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     nextColor: Color = MaterialTheme.colorScheme.tertiary,
 ) {
@@ -43,7 +46,8 @@ public fun MapScreen(
     ) {
         MapCanvas(
             state = state,
-            filledColor = filledColor,
+            northernColor = northernColor,
+            southernColor = southernColor,
             emptyColor = emptyColor,
             nextColor = nextColor,
             modifier =
@@ -68,11 +72,12 @@ public fun MapScreen(
 
 @Composable
 private fun MapCanvas(
-    modifier: Modifier = Modifier,
     state: MapUiState,
-    filledColor: Color,
+    northernColor: Color,
+    southernColor: Color,
     emptyColor: Color,
     nextColor: Color,
+    modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier) {
         val rows = (state.cells.maxOfOrNull { it.row } ?: -1) + 1
@@ -84,6 +89,8 @@ private fun MapCanvas(
         val originY = (size.height - cell * rows) / 2f
         val byCoord = state.cells.associateBy { it.row to it.col }
         for (row in 0 until rows) {
+            val filledColor =
+                if (bandForRow(row, rows) == FlagBand.WHITE) northernColor else southernColor
             for (col in 0 until cols) {
                 val cellUi = byCoord[row to col] ?: continue
                 val topLeft = Offset(originX + col * cell + gap / 2f, originY + row * cell + gap / 2f)
