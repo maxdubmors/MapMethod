@@ -30,6 +30,10 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":feature:map:api"))
+    implementation(project(":feature:map:impl"))
+    implementation(libs.androidx.hilt.lifecycle.viewModelCompose)
+    implementation(libs.orbit.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
