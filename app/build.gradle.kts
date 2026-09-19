@@ -30,6 +30,8 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":feature:second:api"))
+    implementation(project(":feature:second:impl"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

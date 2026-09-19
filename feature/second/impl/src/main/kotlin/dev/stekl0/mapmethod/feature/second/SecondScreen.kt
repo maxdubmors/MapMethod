@@ -1,4 +1,4 @@
-package dev.stekl0.mapmethod.ui
+package dev.stekl0.mapmethod.feature.second
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
