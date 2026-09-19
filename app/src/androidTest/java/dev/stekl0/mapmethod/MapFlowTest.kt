@@ -2,14 +2,21 @@ package dev.stekl0.mapmethod
 
 import android.app.Activity
 import android.app.Application
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -49,6 +56,43 @@ public class MapFlowTest {
         val (filledAfter, totalAfter) = progress()
         assertEquals(filledBefore + 1, filledAfter)
         assertEquals(total, totalAfter)
+    }
+
+    @Test
+    public fun pinchZoomsAndRotationRetains() {
+        val canvas = compose.onNodeWithTag("mapCanvas")
+        canvas.assertIsDisplayed()
+        val before = canvas.captureToImage().asAndroidBitmap()
+
+        val size = canvas.fetchSemanticsNode().size
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
+        val start = size.width * 0.1f
+        val end = size.width * 0.4f
+        canvas.performTouchInput {
+            down(0, Offset(centerX - start, centerY))
+            down(1, Offset(centerX + start, centerY))
+            repeat(6) { step ->
+                val spread = start + (end - start) * (step + 1) / 6
+                updatePointerTo(0, Offset(centerX - spread, centerY))
+                updatePointerTo(1, Offset(centerX + spread, centerY))
+                move()
+            }
+            up(0)
+            up(1)
+        }
+        compose.waitForIdle()
+        val zoomed = canvas.captureToImage().asAndroidBitmap()
+        assertFalse(zoomed.sameAs(before))
+
+        compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        }
+        compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
+        compose.onNodeWithTag("logButton").assertIsDisplayed()
+        val (_, total) = progress()
+        assertTrue(total > 0)
     }
 
     @Test
