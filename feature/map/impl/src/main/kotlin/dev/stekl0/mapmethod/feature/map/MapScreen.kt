@@ -5,11 +5,15 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,11 +34,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 
 private val ScreenPadding = 16.dp
 private val ContentSpacing = 12.dp
+private val StepperSpacing = 4.dp
 private val CellGap = 1.dp
 private val PolandWhite = Color.White
 private val PolandRed = Color(0xFFDC143C)
@@ -42,13 +48,16 @@ private val PolandRed = Color(0xFFDC143C)
 @Composable
 public fun MapScreen(
     state: MapUiState,
-    onLogClick: () -> Unit,
+    onLogCount: (Int) -> Unit,
     modifier: Modifier = Modifier,
     northernColor: Color = PolandWhite,
     southernColor: Color = PolandRed,
     emptyColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     nextColor: Color = MaterialTheme.colorScheme.tertiary,
 ) {
+    val remaining = state.totalCount - state.filledCount
+    var entryText by rememberSaveable { mutableStateOf("1") }
+    val count = if (state.isFull) null else parseLogCount(entryText, remaining)
     Column(
         modifier =
             modifier
@@ -73,13 +82,89 @@ public fun MapScreen(
             text = stringResource(R.string.feature_map_impl_progress, state.filledCount, state.totalCount),
             modifier = Modifier.testTag("progress"),
         )
+        LogControls(
+            count = count,
+            remaining = remaining,
+            entryText = entryText,
+            onEntryTextChange = { entryText = it },
+            onLogCount = onLogCount,
+        )
+    }
+}
+
+@Composable
+private fun LogControls(
+    count: Int?,
+    remaining: Int,
+    entryText: String,
+    onEntryTextChange: (String) -> Unit,
+    onLogCount: (Int) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(ContentSpacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        OutlinedTextField(
+            value = entryText,
+            onValueChange = { typed ->
+                if (typed.all(Char::isDigit)) onEntryTextChange(clampEntryText(typed, entryText, remaining))
+            },
+            label = { Text(text = stringResource(R.string.feature_map_impl_log_count_label)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            enabled = remaining > 0,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag("logField"),
+        )
+        StepperRow(
+            count = count,
+            remaining = remaining,
+            enabled = remaining > 0,
+            onStep = { onEntryTextChange(it.toString()) },
+        )
         Button(
-            onClick = onLogClick,
-            enabled = !state.isFull,
+            onClick = { count?.let(onLogCount) },
+            enabled = count != null,
             modifier = Modifier.testTag("logButton"),
         ) {
-            Text(text = stringResource(R.string.feature_map_impl_log_push_ups))
+            Text(
+                text =
+                    if (count != null) {
+                        stringResource(R.string.feature_map_impl_log_push_ups, count)
+                    } else {
+                        stringResource(R.string.feature_map_impl_log_push_ups_empty)
+                    },
+            )
         }
+    }
+}
+
+private val StepSizes = listOf(-10, -5, -1, 1, 5, 10)
+
+@Composable
+private fun StepperRow(count: Int?, remaining: Int, enabled: Boolean, onStep: (Int) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(StepperSpacing, Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        for (step in StepSizes) {
+            StepperButton(step = step, current = count, remaining = remaining, enabled = enabled, onStep = onStep)
+        }
+    }
+}
+
+@Composable
+private fun StepperButton(step: Int, current: Int?, remaining: Int, enabled: Boolean, onStep: (Int) -> Unit) {
+    val label = if (step > 0) "+$step" else step.toString()
+    val tag = if (step > 0) "stepPlus$step" else "stepMinus${-step}"
+    OutlinedButton(
+        onClick = { onStep(stepLogCount(current = current, step = step, remaining = remaining)) },
+        enabled = enabled,
+        modifier = Modifier.testTag(tag),
+    ) {
+        Text(text = label)
     }
 }
 

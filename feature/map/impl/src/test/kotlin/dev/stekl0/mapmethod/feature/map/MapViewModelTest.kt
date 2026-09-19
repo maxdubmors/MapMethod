@@ -20,10 +20,17 @@ private class FakeMapRepository : MapRepository {
 
     override fun observeCells(): Flow<List<Cell>> = cells
 
-    override suspend fun logPushUps(): Boolean {
-        val next = cells.value.firstOrNull { !it.filled } ?: return false
-        cells.value = cells.value.map { if (it.orderIndex == next.orderIndex) it.copy(filled = true) else it }
-        return true
+    override suspend fun logPushUps(count: Int): Int {
+        val targets =
+            cells.value
+                .filter { !it.filled }
+                .sortedBy { it.orderIndex }
+                .take(count.coerceAtLeast(0))
+        cells.value =
+            cells.value.map { cell ->
+                if (cell.orderIndex in targets.map { it.orderIndex }) cell.copy(filled = true) else cell
+            }
+        return targets.size
     }
 }
 
@@ -53,7 +60,7 @@ public class MapViewModelTest {
         }
 
     @Test
-    public fun `logPushUps fills the next cell`() =
+    public fun `logPushUps with one fills the next cell`() =
         runTest {
             val viewModel = MapViewModel(FakeMapRepository())
 
@@ -61,7 +68,7 @@ public class MapViewModelTest {
                 expectInitialState()
                 val collecting = runOnCreate()
                 skipItems(1)
-                viewModel.logPushUps()
+                viewModel.logPushUps(1)
                 expectState {
                     copy(
                         cells =
@@ -70,6 +77,31 @@ public class MapViewModelTest {
                                 CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
                             ),
                         filledCount = 1,
+                        totalCount = 2,
+                    )
+                }
+                collecting.cancel()
+            }
+        }
+
+    @Test
+    public fun `logPushUps with count fills that many next cells`() =
+        runTest {
+            val viewModel = MapViewModel(FakeMapRepository())
+
+            viewModel.test(this, MapUiState.EMPTY) {
+                expectInitialState()
+                val collecting = runOnCreate()
+                skipItems(1)
+                viewModel.logPushUps(2)
+                expectState {
+                    copy(
+                        cells =
+                            listOf(
+                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
+                                CellUi(orderIndex = 1, row = 0, col = 1, filled = true, isNext = false),
+                            ),
+                        filledCount = 2,
                         totalCount = 2,
                     )
                 }

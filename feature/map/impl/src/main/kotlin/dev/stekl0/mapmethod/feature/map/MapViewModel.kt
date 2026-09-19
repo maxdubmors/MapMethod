@@ -23,8 +23,8 @@ public class MapViewModel
                 },
             )
 
-        public fun logPushUps() {
-            intent { repository.logPushUps() }
+        public fun logPushUps(count: Int) {
+            intent { repository.logPushUps(count) }
         }
     }
 

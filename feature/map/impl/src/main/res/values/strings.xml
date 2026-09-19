@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_map_impl_log_push_ups">Log 10 push-ups</string>
+    <string name="feature_map_impl_log_push_ups">Log %1$d push-ups</string>
+    <string name="feature_map_impl_log_push_ups_empty">Log push-ups</string>
+    <string name="feature_map_impl_log_count_label">Push-ups</string>
     <string name="feature_map_impl_progress">Filled %1$d of %2$d</string>
 </resources>

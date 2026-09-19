@@ -32,7 +32,7 @@ public fun MapMethodApp(
     val entryProvider =
         entryProvider<NavKey> {
             mapEntry {
-                MapScreen(state = state, onLogClick = viewModel::logPushUps)
+                MapScreen(state = state, onLogCount = viewModel::logPushUps)
             }
         }
 

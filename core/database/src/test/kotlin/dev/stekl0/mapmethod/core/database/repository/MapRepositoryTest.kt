@@ -6,7 +6,6 @@ import dev.stekl0.mapmethod.core.database.model.CellEntity
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -33,30 +32,60 @@ public class MapRepositoryTest {
         }
 
     @Test
-    public fun `logPushUps fills the lowest unfilled cell`() =
+    public fun `logPushUps with count fills that many lowest unfilled cells`() =
         runTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
 
-            assertTrue(repository.logPushUps())
-            assertTrue(repository.logPushUps())
+            assertEquals(2, repository.logPushUps(2))
 
             var received = emptyList<Cell>()
             val job = launch { repository.observeCells().collect { received = it } }
             testScheduler.advanceUntilIdle()
 
             assertEquals(listOf(true, true, false), received.map { it.filled })
-            assertEquals(2, dao.fillCalls)
             job.cancel()
         }
 
     @Test
-    public fun `logPushUps on a full map returns false without writing`() =
+    public fun `logPushUps beyond remaining fills only what is left`() =
+        runTest {
+            val dao = FakeCellDao(entities())
+            val repository: MapRepository = MapRepositoryImpl(dao)
+
+            assertEquals(3, repository.logPushUps(5))
+
+            var received = emptyList<Cell>()
+            val job = launch { repository.observeCells().collect { received = it } }
+            testScheduler.advanceUntilIdle()
+
+            assertTrue(received.all { it.filled })
+            job.cancel()
+        }
+
+    @Test
+    public fun `logPushUps with non-positive count fills nothing`() =
+        runTest {
+            val dao = FakeCellDao(entities())
+            val repository: MapRepository = MapRepositoryImpl(dao)
+
+            assertEquals(0, repository.logPushUps(0))
+
+            var received = emptyList<Cell>()
+            val job = launch { repository.observeCells().collect { received = it } }
+            testScheduler.advanceUntilIdle()
+
+            assertTrue(received.none { it.filled })
+            job.cancel()
+        }
+
+    @Test
+    public fun `logPushUps on a full map returns zero without writing`() =
         runTest {
             val dao = FakeCellDao(listOf(CellEntity(orderIndex = 0, row = 0, col = 0, filledAt = 1L)))
             val repository: MapRepository = MapRepositoryImpl(dao)
 
-            assertFalse(repository.logPushUps())
+            assertEquals(0, repository.logPushUps(3))
             assertEquals(1, dao.fillCalls)
         }
 }

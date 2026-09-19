@@ -16,12 +16,13 @@ public interface CellDao {
     public suspend fun insertCells(cells: List<CellEntity>)
 
     /**
-     * Fills the next empty Cell in one statement; returns 1 when a Cell was
-     * filled, 0 when the Map is already full.
+     * Fills up to [count] next empty Cells in one statement; returns how many
+     * Cells were filled, 0 when the Map is already full.
      */
     @Query(
         "UPDATE cells SET filledAt = :filledAt " +
-            "WHERE orderIndex = (SELECT MIN(orderIndex) FROM cells WHERE filledAt IS NULL)",
+            "WHERE orderIndex IN (SELECT orderIndex FROM cells WHERE filledAt IS NULL " +
+            "ORDER BY orderIndex LIMIT :count)",
     )
-    public suspend fun fillNext(filledAt: Long): Int
+    public suspend fun fillNext(count: Int, filledAt: Long): Int
 }

@@ -7,6 +7,6 @@ import kotlinx.coroutines.flow.Flow
 public interface MapRepository {
     public fun observeCells(): Flow<List<Cell>>
 
-    /** Fills the next empty Cell; returns false when the Map is already full. */
-    public suspend fun logPushUps(): Boolean
+    /** Fills up to [count] next empty Cells; returns how many were filled. */
+    public suspend fun logPushUps(count: Int): Int
 }

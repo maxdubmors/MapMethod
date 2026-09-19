@@ -14,6 +14,8 @@ public class MapRepositoryImpl
         override fun observeCells(): Flow<List<dev.stekl0.mapmethod.core.database.model.Cell>> =
             cellDao.observeCells().map { entities -> entities.map { it.toCell() } }
 
-        override suspend fun logPushUps(): Boolean =
-            cellDao.fillNext(filledAt = System.currentTimeMillis()) == 1
+        override suspend fun logPushUps(count: Int): Int {
+            if (count <= 0) return 0
+            return cellDao.fillNext(count = count, filledAt = System.currentTimeMillis())
+        }
     }

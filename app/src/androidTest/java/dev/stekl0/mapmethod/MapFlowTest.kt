@@ -9,10 +9,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso
 import org.junit.Assert.assertEquals
@@ -56,6 +58,53 @@ public class MapFlowTest {
         val (filledAfter, totalAfter) = progress()
         assertEquals(filledBefore + 1, filledAfter)
         assertEquals(total, totalAfter)
+    }
+
+    @Test
+    public fun typeCountFillsThatManyCells() {
+        val (filledBefore, total) = progress()
+
+        compose.onNodeWithTag("logField").performTextReplacement("5")
+        compose.onNodeWithTag("logButton").performClick()
+        compose.waitUntil(timeoutMillis = 10_000) { progress().first != filledBefore }
+
+        val (filledAfter, _) = progress()
+        assertEquals(filledBefore + minOf(5, total - filledBefore), filledAfter)
+    }
+
+    @Test
+    public fun stepperPlusFiveFromDefaultFillsSix() {
+        val (filledBefore, total) = progress()
+
+        compose.onNodeWithTag("stepPlus5").performClick()
+        compose.onNodeWithTag("logButton").performClick()
+        compose.waitUntil(timeoutMillis = 10_000) { progress().first != filledBefore }
+
+        val (filledAfter, _) = progress()
+        assertEquals(filledBefore + minOf(6, total - filledBefore), filledAfter)
+    }
+
+    @Test
+    public fun clearedFieldDisablesLog() {
+        compose.onNodeWithTag("logField").performTextReplacement("")
+        compose.onNodeWithTag("logButton").assertIsNotEnabled()
+    }
+
+    @Test
+    public fun rotationRetainsTypedEntry() {
+        compose.onNodeWithTag("logField").performTextReplacement("7")
+
+        compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        }
+
+        val text =
+            compose.onNodeWithTag("logField")
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.EditableText]
+                .text
+        assertEquals("7", text)
     }
 
     @Test
