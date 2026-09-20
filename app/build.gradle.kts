@@ -26,6 +26,9 @@ android {
     }
     testOptions.unitTests.isIncludeAndroidResources = true
     namespace = "dev.stekl0.mapmethod"
+    androidResources {
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {
