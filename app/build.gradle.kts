@@ -8,8 +8,8 @@ plugins {
 android {
     defaultConfig {
         applicationId = "dev.stekl0.mapmethod"
-        versionCode = 2
-        versionName = "0.1.1" // X.Y.Z; X = Major, Y = minor, Z = Patch level
+        versionCode = 3
+        versionName = "0.2.0" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,8 +32,8 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":feature:map:api"))
     implementation(project(":feature:map:impl"))
-    implementation(libs.androidx.hilt.lifecycle.viewModelCompose)
-    implementation(libs.orbit.compose)
+    implementation(project(":feature:start:api"))
+    implementation(project(":feature:start:impl"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

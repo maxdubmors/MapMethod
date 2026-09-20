@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -40,8 +41,35 @@ public class MapFlowTest {
         return match.groupValues[1].toInt() to match.groupValues[2].toInt()
     }
 
+    private fun goToMap() {
+        val showMapButton = compose.onNodeWithTag("showMapButton")
+        showMapButton.assertIsDisplayed()
+        showMapButton.performClick()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithTag("mapCanvas").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    public fun startIsEntryWithGreeting() {
+        compose.onNodeWithTag("startTitle").assertIsDisplayed()
+        compose.onNodeWithTag("startSubtitle").assertIsDisplayed()
+        compose.onNodeWithTag("showMapButton").assertIsDisplayed()
+    }
+
+    @Test
+    public fun showMapNavigatesOneWayToMap() {
+        goToMap()
+
+        compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
+        compose.onNodeWithTag("logButton").assertIsDisplayed()
+        compose.onNodeWithTag("progress").assertIsDisplayed()
+    }
+
     @Test
     public fun mapIsStartWithLogAction() {
+        goToMap()
+
         compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
         compose.onNodeWithTag("logButton").assertIsDisplayed()
         compose.onNodeWithTag("progress").assertIsDisplayed()
@@ -49,6 +77,8 @@ public class MapFlowTest {
 
     @Test
     public fun logFillsExactlyOneCell() {
+        goToMap()
+
         val (filledBefore, total) = progress()
         assertTrue(total > 0)
 
@@ -62,6 +92,8 @@ public class MapFlowTest {
 
     @Test
     public fun typeCountFillsThatManyCells() {
+        goToMap()
+
         val (filledBefore, total) = progress()
 
         compose.onNodeWithTag("logField").performTextReplacement("5")
@@ -74,6 +106,8 @@ public class MapFlowTest {
 
     @Test
     public fun stepperPlusFiveFromDefaultFillsSix() {
+        goToMap()
+
         val (filledBefore, total) = progress()
 
         compose.onNodeWithTag("stepPlus5").performClick()
@@ -86,12 +120,16 @@ public class MapFlowTest {
 
     @Test
     public fun clearedFieldDisablesLog() {
+        goToMap()
+
         compose.onNodeWithTag("logField").performTextReplacement("")
         compose.onNodeWithTag("logButton").assertIsNotEnabled()
     }
 
     @Test
     public fun rotationRetainsTypedEntry() {
+        goToMap()
+
         compose.onNodeWithTag("logField").performTextReplacement("7")
 
         compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -109,6 +147,8 @@ public class MapFlowTest {
 
     @Test
     public fun pinchZoomsAndRotationRetains() {
+        goToMap()
+
         val canvas = compose.onNodeWithTag("mapCanvas")
         canvas.assertIsDisplayed()
         val before = canvas.captureToImage().asAndroidBitmap()
@@ -146,6 +186,8 @@ public class MapFlowTest {
 
     @Test
     public fun rootBackLeavesApp() {
+        goToMap()
+
         val destroyed = CountDownLatch(1)
         val callbacks =
             object : Application.ActivityLifecycleCallbacks {

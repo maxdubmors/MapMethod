@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_map_impl_log_push_ups">Записать %1$d отжиманий</string>
+    <string name="feature_map_impl_log_push_ups_empty">Записать отжимания</string>
+    <string name="feature_map_impl_log_count_label">Отжимания</string>
+    <string name="feature_map_impl_progress">Заполнено %1$d из %2$d</string>
+</resources>

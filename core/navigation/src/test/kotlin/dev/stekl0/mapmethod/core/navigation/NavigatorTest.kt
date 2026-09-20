@@ -12,6 +12,8 @@ private object HomeKey : NavKey
 
 private object SecondKey : NavKey
 
+private object ThirdKey : NavKey
+
 class NavigatorTest {
     private lateinit var backStack: NavBackStack<NavKey>
     private lateinit var navigator: Navigator
@@ -65,5 +67,16 @@ class NavigatorTest {
 
         assertEquals(1, backStack.size)
         assertEquals(HomeKey, backStack.last())
+    }
+
+    @Test
+    fun replaceClearsBackStackToNewKey() {
+        navigator.navigate(SecondKey)
+
+        navigator.replace(ThirdKey)
+
+        assertEquals(1, backStack.size)
+        assertEquals(ThirdKey, backStack.last())
+        assertFalse(navigator.canGoBack)
     }
 }

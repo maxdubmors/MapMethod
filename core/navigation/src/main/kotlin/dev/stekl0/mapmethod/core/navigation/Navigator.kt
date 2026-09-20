@@ -33,6 +33,12 @@ public class Navigator internal constructor(
             mutableBackStack.removeLastOrNull()
         }
     }
+
+    /** Clear the history and set [key] as the single entry. */
+    public fun replace(key: NavKey) {
+        mutableBackStack.clear()
+        mutableBackStack.add(key)
+    }
 }
 
 /**

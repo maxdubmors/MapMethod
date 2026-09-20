@@ -36,6 +36,8 @@ include(":core:database")
 include(":core:navigation")
 include(":feature:map:api")
 include(":feature:map:impl")
+include(":feature:start:api")
+include(":feature:start:impl")
 
 check(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
     """

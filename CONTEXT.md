@@ -15,3 +15,7 @@ _Avoid_: tile, square
 **Log**:
 A manual record of push-ups that fills that many next empty Cells, without deduplication in v1.
 _Avoid_: achievement, workout, set
+
+**Start**:
+The greeting entry screen that navigates one-way to Map.
+_Avoid_: starting screen, welcome, home
