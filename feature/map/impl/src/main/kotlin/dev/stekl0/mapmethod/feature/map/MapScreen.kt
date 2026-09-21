@@ -72,6 +72,7 @@ public fun MapScreen(
     ) {
         MapCanvas(
             state = state,
+            previewCount = count,
             northernColor = northernColor,
             southernColor = southernColor,
             emptyColor = emptyColor,
@@ -176,6 +177,7 @@ private fun StepperButton(step: Int, current: Int?, remaining: Int, enabled: Boo
 @Composable
 private fun MapCanvas(
     state: MapUiState,
+    previewCount: Int?,
     northernColor: Color,
     southernColor: Color,
     emptyColor: Color,
@@ -233,6 +235,7 @@ private fun MapCanvas(
             cells = state.cells,
             rows = rows,
             cols = cols,
+            preview = previewOrderIndexes(state.cells, previewCount),
             northernColor = northernColor,
             southernColor = southernColor,
             emptyColor = emptyColor,
@@ -245,6 +248,7 @@ private fun DrawScope.drawMapGrid(
     cells: List<CellUi>,
     rows: Int,
     cols: Int,
+    preview: Set<Int>,
     northernColor: Color,
     southernColor: Color,
     emptyColor: Color,
@@ -272,7 +276,7 @@ private fun DrawScope.drawMapGrid(
                 topLeft = topLeft,
                 size = cellSize,
             )
-            if (cellUi.isNext && !cellUi.filled) {
+            if (!cellUi.filled && cellUi.orderIndex in preview) {
                 drawRect(color = nextColor, topLeft = topLeft, size = cellSize, style = Stroke(width = gap))
             }
         }
