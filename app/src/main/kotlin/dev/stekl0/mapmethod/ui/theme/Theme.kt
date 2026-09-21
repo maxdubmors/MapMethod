@@ -34,6 +34,7 @@ private val LightColorScheme =
     )
 
 @Composable
+@Suppress("ModifierRequired") // Theme wrappers emit no layout; cf. NiA NiaTheme with no modifier.
 public fun MapMethodTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
@@ -42,7 +43,7 @@ public fun MapMethodTheme(
 ) {
     val colorScheme =
         when {
-            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            dynamicColor && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }

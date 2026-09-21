@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.orbitmvi.orbit.test.test
+import org.orbitmvi.orbit.test.testWithInternalState
 
 private class FakeMapRepository : MapRepository {
     val cells =
@@ -23,9 +23,11 @@ private class FakeMapRepository : MapRepository {
     override suspend fun logPushUps(count: Int): Int {
         val targets =
             cells.value
+                .asSequence()
                 .filter { !it.filled }
                 .sortedBy { it.orderIndex }
                 .take(count.coerceAtLeast(0))
+                .toList()
         cells.value =
             cells.value.map { cell ->
                 if (cell.orderIndex in targets.map { it.orderIndex }) cell.copy(filled = true) else cell
@@ -35,16 +37,15 @@ private class FakeMapRepository : MapRepository {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-public class MapViewModelTest {
+class MapViewModelTest {
     @Test
-    public fun `collecting cells exposes ordered state with next marked`() =
+    fun `collecting cells exposes ordered state with next marked`() =
         runTest {
             val viewModel = MapViewModel(FakeMapRepository())
 
-            viewModel.test(this, MapUiState.EMPTY) {
-                expectInitialState()
+            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
                 val collecting = runOnCreate()
-                expectState {
+                expectInternalState {
                     copy(
                         cells =
                             listOf(
@@ -60,16 +61,15 @@ public class MapViewModelTest {
         }
 
     @Test
-    public fun `logPushUps with one fills the next cell`() =
+    fun `logPushUps with one fills the next cell`() =
         runTest {
             val viewModel = MapViewModel(FakeMapRepository())
 
-            viewModel.test(this, MapUiState.EMPTY) {
-                expectInitialState()
+            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
-                expectState {
+                expectInternalState {
                     copy(
                         cells =
                             listOf(
@@ -85,16 +85,15 @@ public class MapViewModelTest {
         }
 
     @Test
-    public fun `logPushUps with count fills that many next cells`() =
+    fun `logPushUps with count fills that many next cells`() =
         runTest {
             val viewModel = MapViewModel(FakeMapRepository())
 
-            viewModel.test(this, MapUiState.EMPTY) {
-                expectInitialState()
+            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(2)
-                expectState {
+                expectInternalState {
                     copy(
                         cells =
                             listOf(

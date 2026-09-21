@@ -1,5 +1,8 @@
 package dev.stekl0.mapmethod.feature.map
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 public data class CellUi(
     val orderIndex: Int,
     val row: Int,
@@ -8,6 +11,7 @@ public data class CellUi(
     val isNext: Boolean,
 )
 
+@Immutable
 public data class MapUiState(
     val cells: List<CellUi>,
     val filledCount: Int,

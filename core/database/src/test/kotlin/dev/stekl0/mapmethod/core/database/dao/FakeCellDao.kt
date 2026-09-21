@@ -16,14 +16,15 @@ internal class FakeCellDao(
     override fun observeCells(): Flow<List<CellEntity>> = cells.map { it.sortedBy(CellEntity::orderIndex) }
 
     override suspend fun insertCells(cells: List<CellEntity>) {
-        val known = this.cells.value.map { it.orderIndex }.toSet()
-        this.cells.value = this.cells.value + cells.filter { it.orderIndex !in known }
+        val known = this.cells.value.asSequence().map { it.orderIndex }.toSet()
+        this.cells.value += cells.filter { it.orderIndex !in known }
     }
 
     override suspend fun fillNext(count: Int, filledAt: Long): Int {
         fillCalls++
         val targets =
             cells.value
+                .asSequence()
                 .filter { it.filledAt == null }
                 .sortedBy { it.orderIndex }
                 .take(count.coerceAtLeast(0))

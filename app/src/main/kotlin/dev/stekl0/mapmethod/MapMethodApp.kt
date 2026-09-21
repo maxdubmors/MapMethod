@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -27,8 +26,8 @@ public fun MapMethodApp(
     val navigator = rememberNavigator(StartNavKey)
     val title = stringResource(R.string.app_name)
     val entryProvider =
-        entryProvider<NavKey> {
-            startEntry(title = title, onShowMap = { navigator.replace(MapNavKey) })
+        entryProvider {
+            startEntry(title = title) { navigator.replace(MapNavKey) }
             mapEntry()
         }
 
