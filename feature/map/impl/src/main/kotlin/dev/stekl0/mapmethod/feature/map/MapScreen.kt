@@ -45,8 +45,20 @@ private val ContentSpacing = 12.dp
 private val StepperSpacing = 4.dp
 private val StepperButtonPadding = 8.dp
 private val CellGap = 1.dp
+// Non-const by design: const would trip standard:property-naming, PascalCase matches CellGap.
+@Suppress("MayBeConst")
+private val MinZoom = 1f
+@Suppress("MayBeConst")
+private val MaxZoom = 4f
 private val PolandWhite = Color.White
 private val PolandRed = Color(0xFFDC143C)
+
+private data class MapGridColors(
+    val northern: Color,
+    val southern: Color,
+    val empty: Color,
+    val next: Color,
+)
 
 @Composable
 public fun MapScreen(
@@ -73,10 +85,13 @@ public fun MapScreen(
         MapCanvas(
             state = state,
             previewCount = count,
-            northernColor = northernColor,
-            southernColor = southernColor,
-            emptyColor = emptyColor,
-            nextColor = nextColor,
+            colors =
+                MapGridColors(
+                    northern = northernColor,
+                    southern = southernColor,
+                    empty = emptyColor,
+                    next = nextColor,
+                ),
             modifier =
                 Modifier
                     .weight(1f)
@@ -178,30 +193,27 @@ private fun StepperButton(step: Int, current: Int?, remaining: Int, enabled: Boo
 private fun MapCanvas(
     state: MapUiState,
     previewCount: Int?,
-    northernColor: Color,
-    southernColor: Color,
-    emptyColor: Color,
-    nextColor: Color,
+    colors: MapGridColors,
     modifier: Modifier = Modifier,
 ) {
-    val minZoom = 1f
-    val maxZoom = 4f
-    var scale by rememberSaveable { mutableFloatStateOf(minZoom) }
+    var scale by rememberSaveable { mutableFloatStateOf(MinZoom) }
     var offsetX by rememberSaveable { mutableFloatStateOf(0f) }
     var offsetY by rememberSaveable { mutableFloatStateOf(0f) }
     var viewport by remember { mutableStateOf(Size.Zero) }
-    val rows = (state.cells.maxOfOrNull { it.row } ?: -1) + 1
-    val cols = (state.cells.maxOfOrNull { it.col } ?: -1) + 1
+    val cells = state.cells
+    val rows = remember(cells) { (cells.maxOfOrNull { it.row } ?: -1) + 1 }
+    val cols = remember(cells) { (cells.maxOfOrNull { it.col } ?: -1) + 1 }
+    val preview = remember(cells, previewCount) { previewOrderIndexes(cells, previewCount) }
     val transform =
-        rememberTransformableState { zoomChange, panChange, _ ->
-            scale = (scale * zoomChange).coerceIn(minZoom, maxZoom)
-            val content = gridMetrics(viewport, rows, cols)
+        rememberTransformableState { _, zoomChange, panChange, _ ->
+            scale = (scale * zoomChange).coerceIn(MinZoom, MaxZoom)
             val clamped =
-                clampZoomOffset(
+                clampPanToGrid(
                     Offset(offsetX + panChange.x, offsetY + panChange.y),
                     scale,
                     viewport,
-                    Size(content.width, content.height),
+                    rows,
+                    cols,
                 )
             offsetX = clamped.x
             offsetY = clamped.y
@@ -211,14 +223,7 @@ private fun MapCanvas(
             modifier
                 .onSizeChanged {
                     viewport = it.toSize()
-                    val content = gridMetrics(viewport, rows, cols)
-                    val clamped =
-                        clampZoomOffset(
-                            Offset(offsetX, offsetY),
-                            scale,
-                            viewport,
-                            Size(content.width, content.height),
-                        )
+                    val clamped = clampPanToGrid(Offset(offsetX, offsetY), scale, viewport, rows, cols)
                     offsetX = clamped.x
                     offsetY = clamped.y
                 }
@@ -232,16 +237,18 @@ private fun MapCanvas(
                 .clipToBounds(),
     ) {
         drawMapGrid(
-            cells = state.cells,
+            cells = cells,
             rows = rows,
             cols = cols,
-            preview = previewOrderIndexes(state.cells, previewCount),
-            northernColor = northernColor,
-            southernColor = southernColor,
-            emptyColor = emptyColor,
-            nextColor = nextColor,
+            preview = preview,
+            colors = colors,
         )
     }
+}
+
+private fun clampPanToGrid(offset: Offset, scale: Float, viewport: Size, rows: Int, cols: Int): Offset {
+    val content = gridMetrics(viewport, rows, cols)
+    return clampZoomOffset(offset, scale, viewport, Size(content.width, content.height))
 }
 
 private fun DrawScope.drawMapGrid(
@@ -249,12 +256,9 @@ private fun DrawScope.drawMapGrid(
     rows: Int,
     cols: Int,
     preview: Set<Int>,
-    northernColor: Color,
-    southernColor: Color,
-    emptyColor: Color,
-    nextColor: Color,
+    colors: MapGridColors,
 ) {
-    if (rows <= 0 || cols <= 0) return
+    if ((rows <= 0) || (cols <= 0)) return
     val metrics = gridMetrics(size, rows, cols)
     val gap = CellGap.toPx()
     val originX = (size.width - metrics.width) / 2f
@@ -262,7 +266,7 @@ private fun DrawScope.drawMapGrid(
     val byCoord = cells.associateBy { it.row to it.col }
     for (row in 0 until rows) {
         val filledColor =
-            if (bandForRow(row, rows) == FlagBand.WHITE) northernColor else southernColor
+            if (bandForRow(row, rows) == FlagBand.WHITE) colors.northern else colors.southern
         for (col in 0 until cols) {
             val cellUi = byCoord[row to col] ?: continue
             val topLeft =
@@ -272,12 +276,12 @@ private fun DrawScope.drawMapGrid(
                 )
             val cellSize = Size(metrics.cell - gap, metrics.cell - gap)
             drawRect(
-                color = if (cellUi.filled) filledColor else emptyColor,
+                color = if (cellUi.filled) filledColor else colors.empty,
                 topLeft = topLeft,
                 size = cellSize,
             )
-            if (!cellUi.filled && cellUi.orderIndex in preview) {
-                drawRect(color = nextColor, topLeft = topLeft, size = cellSize, style = Stroke(width = gap))
+            if (!cellUi.filled && (cellUi.orderIndex in preview)) {
+                drawRect(color = colors.next, topLeft = topLeft, size = cellSize, style = Stroke(width = gap))
             }
         }
     }

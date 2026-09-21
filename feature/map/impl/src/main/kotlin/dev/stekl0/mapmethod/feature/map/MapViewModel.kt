@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.stekl0.mapmethod.core.database.model.Cell
 import dev.stekl0.mapmethod.core.database.repository.MapRepository
-import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.OrbitContainer
+import org.orbitmvi.orbit.OrbitContainerHost
 import org.orbitmvi.orbit.viewmodel.orbitContainer
 import javax.inject.Inject
 
@@ -14,17 +14,16 @@ public class MapViewModel
     @Inject
     constructor(
         private val repository: MapRepository,
-    ) : ViewModel(), ContainerHost<MapUiState, Nothing> {
+    ) : ViewModel(), OrbitContainerHost<MapUiState, MapUiState, Nothing> {
         override val container: OrbitContainer<MapUiState, MapUiState, Nothing> =
-            orbitContainer(
-                initialState = MapUiState.EMPTY,
-                onCreate = {
-                    repository.observeCells().collect { cells -> reduce { cells.toUiState() } }
-                },
-            )
+            orbitContainer(initialState = MapUiState.EMPTY) {
+                repository.observeCells().collect { cells -> reduce { cells.toUiState() } }
+            }
 
         public fun logPushUps(count: Int) {
-            intent { repository.logPushUps(count) }
+            intent {
+                repository.logPushUps(count).let { _ -> }
+            }
         }
     }
 

@@ -12,7 +12,7 @@ internal data class GridMetrics(
 )
 
 internal fun gridMetrics(viewport: Size, rows: Int, cols: Int): GridMetrics {
-    if (rows <= 0 || cols <= 0) return GridMetrics(cell = 0f, width = 0f, height = 0f)
+    if ((rows <= 0) || (cols <= 0)) return GridMetrics(cell = 0f, width = 0f, height = 0f)
     val cell = minOf(viewport.width / cols, viewport.height / rows)
     return GridMetrics(cell = cell, width = cell * cols, height = cell * rows)
 }
@@ -25,7 +25,7 @@ internal fun clampZoomOffset(
     content: Size,
 ): Offset {
     fun clampAxis(position: Float, viewportExtent: Float, contentExtent: Float): Float {
-        val range = max((contentExtent * scale - viewportExtent) / 2f, 0f)
+        val range = max((((contentExtent * scale) - viewportExtent) / 2f), 0f)
         if (range == 0f) return 0f
         return position.coerceIn(-range, range)
     }

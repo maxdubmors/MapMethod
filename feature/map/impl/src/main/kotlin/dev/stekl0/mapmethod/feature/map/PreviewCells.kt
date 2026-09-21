@@ -8,9 +8,11 @@ package dev.stekl0.mapmethod.feature.map
  * [count] unfilled Cells in fill order are returned.
  */
 internal fun previewOrderIndexes(cells: List<CellUi>, count: Int?): Set<Int> {
-    val unfilled = cells.filter { !it.filled }.sortedBy { it.orderIndex }
-    if (unfilled.isEmpty()) return emptySet()
-    if (count == null) return setOf(unfilled.first().orderIndex)
-    if (count < 1) return emptySet()
-    return unfilled.take(count).map { it.orderIndex }.toSet()
+    val unfilled = cells.asSequence().filter { !it.filled }.sortedBy { it.orderIndex }.toList()
+    return when {
+        unfilled.isEmpty() -> emptySet()
+        count == null -> setOf(unfilled.first().orderIndex)
+        (count < 1) -> emptySet()
+        else -> unfilled.asSequence().take(count).map { it.orderIndex }.toSet()
+    }
 }

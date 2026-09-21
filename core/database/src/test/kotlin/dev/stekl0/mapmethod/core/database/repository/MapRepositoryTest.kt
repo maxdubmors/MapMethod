@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-public class MapRepositoryTest {
+class MapRepositoryTest {
     private fun entities() =
         listOf(
             CellEntity(orderIndex = 0, row = 0, col = 1, filledAt = null),
@@ -18,7 +18,7 @@ public class MapRepositoryTest {
         )
 
     @Test
-    public fun `observeCells maps entities in fill order`() =
+    fun `observeCells maps entities in fill order`() =
         runTest {
             val repository: MapRepository = MapRepositoryImpl(FakeCellDao(entities()))
 
@@ -32,7 +32,7 @@ public class MapRepositoryTest {
         }
 
     @Test
-    public fun `logPushUps with count fills that many lowest unfilled cells`() =
+    fun `logPushUps with count fills that many lowest unfilled cells`() =
         runTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
@@ -48,7 +48,7 @@ public class MapRepositoryTest {
         }
 
     @Test
-    public fun `logPushUps beyond remaining fills only what is left`() =
+    fun `logPushUps beyond remaining fills only what is left`() =
         runTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
@@ -64,7 +64,7 @@ public class MapRepositoryTest {
         }
 
     @Test
-    public fun `logPushUps with non-positive count fills nothing`() =
+    fun `logPushUps with non-positive count fills nothing`() =
         runTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
@@ -80,7 +80,7 @@ public class MapRepositoryTest {
         }
 
     @Test
-    public fun `logPushUps on a full map returns zero without writing`() =
+    fun `logPushUps on a full map returns zero without writing`() =
         runTest {
             val dao = FakeCellDao(listOf(CellEntity(orderIndex = 0, row = 0, col = 0, filledAt = 1L)))
             val repository: MapRepository = MapRepositoryImpl(dao)

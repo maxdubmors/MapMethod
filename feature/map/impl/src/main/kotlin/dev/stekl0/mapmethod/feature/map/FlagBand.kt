@@ -9,4 +9,4 @@ internal enum class FlagBand {
 internal fun bandForRow(
     row: Int,
     rows: Int,
-): FlagBand = if (row < rows / 2) FlagBand.WHITE else FlagBand.RED
+): FlagBand = if (row < (rows / 2)) FlagBand.WHITE else FlagBand.RED
