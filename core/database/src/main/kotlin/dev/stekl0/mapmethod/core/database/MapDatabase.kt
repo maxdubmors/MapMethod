@@ -1,7 +1,7 @@
 package dev.stekl0.mapmethod.core.database
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
 import dev.stekl0.mapmethod.core.database.dao.CellDao
 import dev.stekl0.mapmethod.core.database.model.CellEntity
 

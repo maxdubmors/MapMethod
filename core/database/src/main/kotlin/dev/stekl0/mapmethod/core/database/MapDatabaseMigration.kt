@@ -1,9 +1,6 @@
 package dev.stekl0.mapmethod.core.database
 
-import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room3.migration.Migration
 import dev.stekl0.mapmethod.core.database.model.CellEntity
 import dev.stekl0.mapmethod.core.database.model.PolandMask
 
@@ -18,22 +15,25 @@ internal fun reseedPreservingFill(oldFilledAt: List<Long>, newCells: List<CellEn
 
 /** Version 1 to 2: same schema, new mask rows with the filled count preserved. */
 internal val MapDatabaseMigration1To2: Migration =
-    object : Migration(1, 2) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            val filled = mutableListOf<Long>()
-            db.query("SELECT filledAt FROM cells WHERE filledAt IS NOT NULL ORDER BY orderIndex").use { cursor ->
-                while (cursor.moveToNext()) filled.add(cursor.getLong(cursor.getColumnIndexOrThrow("filledAt")))
-            }
-            db.execSQL("DELETE FROM cells")
-            reseedPreservingFill(filled, PolandMask.entities()).forEach { cell ->
-                val values =
-                    ContentValues().apply {
-                        put("orderIndex", cell.orderIndex)
-                        put("row", cell.row)
-                        put("col", cell.col)
-                        if (cell.filledAt == null) putNull("filledAt") else put("filledAt", cell.filledAt)
-                    }
-                db.insert("cells", SQLiteDatabase.CONFLICT_NONE, values)
+    // Android-only sync driver APIs: Room runs migrations on its query
+    // dispatcher inside a transaction, so blocking prepare/step is fine.
+    Migration(1, 2) { connection ->
+        val filled = mutableListOf<Long>()
+        connection.prepare(
+            "SELECT filledAt FROM cells WHERE filledAt IS NOT NULL ORDER BY orderIndex",
+        ).use { stmt ->
+            while (stmt.step()) filled.add(stmt.getLong(0))
+        }
+        connection.prepare("DELETE FROM cells").use { it.step() }
+        reseedPreservingFill(filled, PolandMask.entities()).forEach { cell ->
+            connection.prepare(
+                "INSERT INTO cells (`orderIndex`, `row`, `col`, filledAt) VALUES (?, ?, ?, ?)",
+            ).use { stmt ->
+                stmt.bindLong(1, cell.orderIndex.toLong())
+                stmt.bindLong(2, cell.row.toLong())
+                stmt.bindLong(3, cell.col.toLong())
+                if (cell.filledAt == null) stmt.bindNull(4) else stmt.bindLong(4, cell.filledAt)
+                stmt.step()
             }
         }
     }

@@ -18,7 +18,7 @@ kotlinter = "5.7.0"
 ksp = "2.3.12"
 lifecycleRuntimeKtx = "2.11.0"
 orbit = "12.0.1"
-room = "2.8.5"
+room = "3.0.3"
 kotlinxSerialization = "1.11.0"
 kotlinxCoroutines = "1.11.0"
 
@@ -60,9 +60,8 @@ orbit-compose = { group = "org.orbit-mvi", name = "orbit-compose", version.ref =
 orbit-core = { group = "org.orbit-mvi", name = "orbit-core", version.ref = "orbit" }
 orbit-test = { group = "org.orbit-mvi", name = "orbit-test", version.ref = "orbit" }
 orbit-viewmodel = { group = "org.orbit-mvi", name = "orbit-viewmodel", version.ref = "orbit" }
-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
+room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
 
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }
@@ -71,7 +70,7 @@ detekt-gradlePlugin = { group = "dev.detekt", name = "detekt-gradle-plugin", ver
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinter-gradlePlugin = { group = "org.jmailen.gradle", name = "kotlinter-gradle", version.ref = "kotlinter" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
-room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+room-gradlePlugin = { group = "androidx.room3", name = "room3-gradle-plugin", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -83,7 +82,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
-room = { id = "androidx.room", version.ref = "room" }
+room = { id = "androidx.room3", version.ref = "room" }
 
 # Plugins defined by this project
 mapmethod-android-application = { id = "mapmethod.android.application" }
