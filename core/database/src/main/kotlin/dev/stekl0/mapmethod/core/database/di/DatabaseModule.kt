@@ -1,7 +1,7 @@
 package dev.stekl0.mapmethod.core.database.di
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,9 +26,8 @@ internal object DatabaseModule {
         @ApplicationContext context: Context,
     ): MapDatabase {
         val database =
-            Room.databaseBuilder(
+            Room.databaseBuilder<MapDatabase>(
                 context,
-                MapDatabase::class.java,
                 "mapmethod-database",
             ).addMigrations(MapDatabaseMigration1To2).build()
         // Prefill once: inserts ignore existing rows, so this is a no-op
