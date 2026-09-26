@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "compose-screens-footguns": {
+      "source": "maxrave-dev/kotlin-footguns",
+      "sourceType": "github",
+      "skillPath": "skills/compose-screens-footguns/SKILL.md",
+      "computedHash": "8736087d57289348076cb47b6052575bf60cd743a90b303b17838e0701e2b2d1"
+    },
+    "compose-visuals-footguns": {
+      "source": "maxrave-dev/kotlin-footguns",
+      "sourceType": "github",
+      "skillPath": "skills/compose-visuals-footguns/SKILL.md",
+      "computedHash": "3ad56e004818f2f1cb9b22589dbc54f5402985ffb0fa5f5b8a7871e911cb59a0"
+    },
+    "data-layer-footguns": {
+      "source": "maxrave-dev/kotlin-footguns",
+      "sourceType": "github",
+      "skillPath": "skills/data-layer-footguns/SKILL.md",
+      "computedHash": "6d8d15118dc11c7df56e5abaf85e632328c29cdd72d8513e996e7c4805996c20"
+    },
+    "engineering-method-footguns": {
+      "source": "maxrave-dev/kotlin-footguns",
+      "sourceType": "github",
+      "skillPath": "skills/engineering-method-footguns/SKILL.md",
+      "computedHash": "ac10e1ac6696394a27a08d2c8b8a1594e9cf2ac0bec2cf5d06d4abb534ad257a"
+    },
+    "footgun-scan": {
+      "source": "maxrave-dev/kotlin-footguns",
+      "sourceType": "github",
+      "skillPath": "skills/footgun-scan/SKILL.md",
+      "computedHash": "05071bae879936b370c20b4a7ebd1d5454126e1521870a4c082ea638ae42b1e4"
+    },
+    "state-and-background-footguns": {
+      "source": "maxrave-dev/kotlin-footguns",
+      "sourceType": "github",
+      "skillPath": "skills/state-and-background-footguns/SKILL.md",
+      "computedHash": "7a453e394f26c8e64943c93464aaadf55e0249e1f7bd9cb22a5a7260f6e850e9"
+    }
+  }
+}

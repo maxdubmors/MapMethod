@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echolot:*)",
+      "Bash(ya tool ast-index *)",
+      "Bash(ast-index *)"
+    ]
+  },
+  "extraKnownMarketplaces": {
+    "ast-index": {
+      "source": {
+        "source": "github",
+        "repo": "defendend/Claude-ast-index-search"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ast-index@ast-index": true
+  }
+}

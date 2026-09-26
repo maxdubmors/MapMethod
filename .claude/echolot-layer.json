@@ -1,0 +1,15 @@
+{
+  "echolot": "0.7.0",
+  "files": {
+    "agents/perf-hunter.md": "c22ae13e8065199a",
+    "commands/echolot-hunt.md": "6b009b9ab7c28172",
+    "commands/echolot-reflect.md": "c1bccbe4c1642436",
+    "commands/echolot-setup.md": "21f870e7add68b4e",
+    "settings.json": "1f94eeb2d39c3011",
+    "skills/echolot/SKILL.md": "469a87c2acb634da",
+    "skills/echolot/references/collect.md": "41895ca7560d74bf",
+    "skills/echolot/references/config.md": "f4fc01dfdcfc9641",
+    "skills/echolot/references/naming.md": "d3275bf2964c4e78",
+    "skills/echolot/references/report.md": "321ca0d5a81cb2aa"
+  }
+}

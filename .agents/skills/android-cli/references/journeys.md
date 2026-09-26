@@ -84,8 +84,8 @@ The file should have the following format:
 ### Action: Click the blue button ✅
 - **Commands**:
   <!-- A list of the ADB commands executed while evaluating the instruction -->
-  - `adb input swipe 490 200 500 500 500`
-  - `adb input tap 45 920`
+  - `adb shell input swipe 490 200 500 500 500`
+  - `adb shell input tap 45 920`
 
   <!-- Failure reasons, feedback, or other useful information -->
 - **Comment**: The journey step doesn't specify that the button requires scrolling to see
