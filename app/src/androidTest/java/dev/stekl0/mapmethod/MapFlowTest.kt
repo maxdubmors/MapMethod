@@ -30,15 +30,17 @@ class MapFlowTest {
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 
-    private fun progress(): Pair<Int, Int> {
+    private data class Progress(val filled: Int, val total: Int)
+
+    private fun progress(): Progress {
         val text =
             compose.onNodeWithTag("progress")
                 .fetchSemanticsNode()
                 .config[SemanticsProperties.Text]
                 .first()
                 .text
-        val match = Regex("Filled (\\d+) of (\\d+)").find(text)!!
-        return match.groupValues[1].toInt() to match.groupValues[2].toInt()
+        val match = checkNotNull(Regex("Filled (\\d+) of (\\d+)").find(text)) { "Unexpected progress: $text" }
+        return Progress(filled = match.groupValues[1].toInt(), total = match.groupValues[2].toInt())
     }
 
     private fun goToMap() {
@@ -48,6 +50,12 @@ class MapFlowTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("mapCanvas").fetchSemanticsNodes().isNotEmpty()
         }
+        // A fresh install seeds the Map off the main thread; wait for its Cells.
+        compose.waitUntil(timeoutMillis = 10_000) { progress().total > 0 }
+    }
+
+    private fun waitForFilled(filled: Int) {
+        compose.waitUntil(timeoutMillis = 10_000) { progress().filled == filled }
     }
 
     @Test
@@ -76,54 +84,51 @@ class MapFlowTest {
     }
 
     @Test
-    fun logFillsExactlyOneCell() {
+    fun freshMapHasNoFilledCells() {
         goToMap()
 
-        val before = progress()
-        val filledBefore = before.first
-        val total = before.second
-        assertTrue(total > 0)
+        assertEquals(0, progress().filled)
+    }
+
+    @Test
+    fun logFillsExactlyOneCell() {
+        goToMap()
+        val total = progress().total
 
         compose.onNodeWithTag("logButton").performClick()
-        compose.waitUntil(timeoutMillis = 10_000) { progress().first != filledBefore }
+        waitForFilled(1)
 
-        val after = progress()
-        val filledAfter = after.first
-        val totalAfter = after.second
-        assertEquals(filledBefore + 1, filledAfter)
-        assertEquals(total, totalAfter)
+        assertEquals(Progress(filled = 1, total = total), progress())
     }
 
     @Test
     fun typeCountFillsThatManyCells() {
         goToMap()
 
-        val before = progress()
-        val filledBefore = before.first
-        val total = before.second
-
         compose.onNodeWithTag("logField").performTextReplacement("5")
         compose.onNodeWithTag("logButton").performClick()
-        compose.waitUntil(timeoutMillis = 10_000) { progress().first != filledBefore }
-
-        val filledAfter = progress().first
-        assertEquals(filledBefore + minOf(5, total - filledBefore), filledAfter)
+        waitForFilled(5)
     }
 
     @Test
     fun stepperPlusFiveFromDefaultFillsSix() {
         goToMap()
 
-        val before = progress()
-        val filledBefore = before.first
-        val total = before.second
-
         compose.onNodeWithTag("stepPlus5").performClick()
         compose.onNodeWithTag("logButton").performClick()
-        compose.waitUntil(timeoutMillis = 10_000) { progress().first != filledBefore }
+        waitForFilled(6)
+    }
 
-        val filledAfter = progress().first
-        assertEquals(filledBefore + minOf(6, total - filledBefore), filledAfter)
+    @Test
+    fun logAboveRemainingFillsWholeMap() {
+        goToMap()
+        val total = progress().total
+
+        compose.onNodeWithTag("logField").performTextReplacement("99999")
+        compose.onNodeWithTag("logButton").performClick()
+        waitForFilled(total)
+
+        compose.onNodeWithTag("logButton").assertIsNotEnabled()
     }
 
     @Test
@@ -188,8 +193,7 @@ class MapFlowTest {
         }
         compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
         compose.onNodeWithTag("logButton").assertIsDisplayed()
-        val total = progress().second
-        assertTrue(total > 0)
+        assertTrue(progress().total > 0)
     }
 
     @Test
