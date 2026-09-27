@@ -20,9 +20,8 @@ then an exact grep for the slice name. A slice name is a string literal inside
 `trace("…")`; it survives minification and is found precisely.
 
 **Do not read the application to find the problem.** Reading source is where
-your window goes: in two hunts out of two, twenty-odd `cat` and `sed -n` calls
-over the app took forty to sixty percent of everything that entered the
-window — before a single marker was placed. It happens when the report names
+your window goes, and it fills before a single marker is placed. It happens
+when the report names
 system slices and threads (`bindApplication`, `Compose:recompose`,
 `arch_disk_io_*`) and `domains` has no instrumentation to map them to. That
 is the definition of a blind spot, and the answer to a blind spot is
@@ -165,8 +164,8 @@ echolot explain                                    the detectors and their defau
 ```
 
 **Stopping is hard-coded, not a feeling.** `loop.max_rounds` comes from the
-config, default 3. You have no goal of your own to economise; without a limit
-you will spin for days and burn context.
+config, default 3. When it is reached, return an interim conclusion
+(step 5).
 
 ## Rules for temporary instrumentation
 
@@ -192,10 +191,8 @@ AGENTTMP_fill_decks_v6     // where you put it — comparable with nothing
 
 This is not style. `repeated_work` finds the same named work entered from two
 different callers, and that is the whole shape of "this was already done".
-Named by call site, the two entries get two names and there is nothing to
-compare: a migration ladder redoing a rung came out as `AGENTTMP_fill_main`
-and `AGENTTMP_fill_decks_v6`, the duplicate sat in the report as two unrelated
-rows, and the detector built for it stayed silent.
+Named by call site, the two entries get two names, the duplicate shows up in
+the report as two unrelated rows, and `repeated_work` stays silent.
 
 When you genuinely need to say where a call came from, put it in a second
 marker around the caller. Keep the work's own name the same in both places.
@@ -243,11 +240,9 @@ about your conclusion.** Everything you bracketed, with its number, whether or
 not it turned out to be the answer — one line each, no prose, no argument for
 or against. You planted five to seven markers; five to seven lines.
 
-It is here because of what happened without it. An agent bracketed a
-migration ladder, measured `AGENTTMP_fill_decks_v6` at 252.7 ms — the exact
-redundant work the hunt was looking for — and returned a conclusion about
-something else. The number was on its screen and never reached the human. A
-finding you hold and do not pass on is a finding nobody has.
+A marker's number can be the answer even when your conclusion is about
+something else, and only this line carries it to the human. A finding you
+hold and do not pass on is a finding nobody has.
 
 **`Ruled out` is the other half of that, and it costs the next round.** Every
 candidate you looked at and did not carry to a cause, strongest evidence

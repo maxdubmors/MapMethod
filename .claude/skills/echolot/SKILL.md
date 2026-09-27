@@ -79,23 +79,23 @@ re-records and re-instruments on purpose, works inside an investigation it was
 handed, and never calls `status` at all. And within half an hour of the last
 `collect` or `analyze` — that is the same sitting, and `next` says `hunt`.
 
-With an argument, the argument wins over the state:
+With an argument, the argument wins over the state. Every argument after
+`/echolot` is a CLI verb of the same name, except `setup` — that one needs an
+agent and has no shell half. Where a verb has both, `/echolot X` runs
+`echolot X` and then whatever loop it needs.
 
 - `/echolot init` — run `echolot init`. Not setup: `init` installs or
   updates **this** layer; the config is setup's job.
 - `/echolot setup` — the `echolot-setup` skill.
-- `/echolot hunt <words>` — the `echolot-hunt` skill, with the words as what
-  regressed. `/echolot <free text>` about slowness ("why is startup slow",
-  "the list stutters since the redesign") means the same.
+- `/echolot hunt <words>` — that question, without asking first: the CLI half
+  (`echolot hunt <words>`) opens the investigation, then the `echolot-hunt`
+  skill runs it with the words as what regressed.
+- `/echolot <free text>` about slowness ("why is startup slow", "the list
+  stutters since the redesign") — the same, except that with an investigation
+  open it goes through `resume-or-new` first, with "something new" offered
+  first (see above).
 - `/echolot doctor`, `/echolot status`, `/echolot analyze …` — run that
   command, show the output.
-- `/echolot hunt <words>` — that question, without asking first. It is the
-  same word as `echolot hunt <words>` in a shell, and does the same thing
-  plus the loop: the CLI half opens the investigation, the agent half runs it.
-
-Every argument after `/echolot` is a CLI verb of the same name, except
-`setup` — that one needs an agent and has no shell half. Where a verb has
-both, `/echolot X` runs `echolot X` and then whatever loop it needs.
 - `/echolot reflect` — the `echolot-reflect` skill: how the last session
   went, what to change in the tool.
 

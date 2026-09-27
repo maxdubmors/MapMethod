@@ -1,11 +1,10 @@
 # ast-index Rules
 
-## Mandatory Search Rules
+## Search Rules
 
-1. **ALWAYS use ast-index FIRST** for any code search task
-2. **NEVER duplicate results** — if ast-index found usages/implementations, that IS the complete answer
-3. **DO NOT run grep "for completeness"** after ast-index returns results
-4. **Use grep/Search ONLY when:**
+1. Use ast-index for code search: symbols, usages, implementations, hierarchies.
+2. When ast-index returns usages or implementations, treat them as the answer; don't re-run the same search with grep to double-check.
+3. Use grep when:
    - ast-index returns empty results
    - Searching for regex patterns (ast-index uses literal match)
    - Searching for string literals inside code (`"some text"`)

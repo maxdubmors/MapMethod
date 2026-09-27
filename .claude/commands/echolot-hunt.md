@@ -59,10 +59,8 @@ command; there is nothing useful to do while it runs.
 Say it here because the tool's own default is the other way. Backgrounded, the
 turn ends with a promise to come back, and whether a next turn ever arrives is
 not up to this command: under `claude -p` it does not, so the hunt runs, the
-agent finishes, and its answer goes nowhere. That happened once in six
-recorded runs of this very command — the agent did the work and the run
-printed "I will come back with its output" and stopped. `--max-turns` does not
-help; the turn was not cut short, it was finished.
+agent finishes, and its answer goes nowhere. `--max-turns` does not help;
+the turn was not cut short, it was finished.
 
 Handing it over at all is not a formality either: the loop generates a lot of
 mess — raw output, repository searches, instrumentation diffs, several
@@ -83,8 +81,8 @@ Pass the agent:
   (then `--apply`) and one re-record; reading the app to find where the
   time goes comes after the report has named a place.
 
-The window is the budget. In two hunts out of two the agent spent forty to
-sixty percent of it reading sources by hand; `echolot reflect` shows the
+The window is the budget, and reading sources by hand is what uses it up;
+`echolot reflect` shows the
 split (`window fed by:` in the Subagent section) and flags it. `echolot
 mark` exists for exactly that step; if the share stays high with it in
 place, the report says which reads it did not replace.
