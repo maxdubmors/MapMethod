@@ -17,18 +17,14 @@ class LauncherIconTest {
     private val cells = ItalyMotif.cells()
 
     @Test
-    fun `foreground draws shaded and empty motif Cells`() {
-        val paths = pathData("ic_launcher_foreground")
-        assertEquals(cellsPath(cells.filter { it.shaded }), paths["shaded"])
-        assertEquals(cellsPath(cells.filterNot { it.shaded }), paths["empty"])
+    fun `foreground draws filled and empty motif Cells`() {
+        assertMotifPaths("ic_launcher_foreground")
     }
 
     @Test
-    fun `monochrome draws shaded motif Cells solid and empty ones faint`() {
-        val paths = pathData("ic_launcher_monochrome")
-        assertEquals(cellsPath(cells.filter { it.shaded }), paths["shaded"])
-        assertEquals(cellsPath(cells.filterNot { it.shaded }), paths["empty"])
-        val emptyAlpha = attribute("ic_launcher_monochrome", "empty", "android:fillAlpha").toFloat()
+    fun `monochrome draws filled motif Cells solid and empty ones faint`() {
+        assertMotifPaths("ic_launcher_monochrome")
+        val emptyAlpha = paths("ic_launcher_monochrome").getValue("empty").getValue("android:fillAlpha").toFloat()
         assertTrue("empty Cells alpha $emptyAlpha", emptyAlpha > 0f && emptyAlpha < 1f)
     }
 
@@ -38,18 +34,20 @@ class LauncherIconTest {
             cells.maxOf { cell ->
                 listOf(0, 1).maxOf { dx ->
                     listOf(0, 1).maxOf { dy ->
-                        hypot(x(cell, dx * CELL_TENTHS) / 10.0 - CENTER, y(cell, dy * CELL_TENTHS) / 10.0 - CENTER)
+                        val x = xTenths(cell, dx * CELL_TENTHS) / 10.0
+                        val y = yTenths(cell, dy * CELL_TENTHS) / 10.0
+                        hypot(x - CENTER, y - CENTER)
                     }
                 }
             }
         assertTrue("farthest Cell corner at $farthest dp", farthest <= SAFE_RADIUS)
     }
 
-    private fun pathData(drawable: String): Map<String, String> =
-        paths(drawable).mapValues { (_, attributes) -> attributes.getValue("android:pathData") }
-
-    private fun attribute(drawable: String, path: String, name: String): String =
-        paths(drawable).getValue(path).getValue(name)
+    private fun assertMotifPaths(drawable: String) {
+        val paths = paths(drawable)
+        assertEquals(cellsPath(cells.filter { it.filled }), paths.getValue("filled").getValue("android:pathData"))
+        assertEquals(cellsPath(cells.filterNot { it.filled }), paths.getValue("empty").getValue("android:pathData"))
+    }
 
     /** Attributes of every `<path>` in the drawable, keyed by `android:name`. */
     private fun paths(drawable: String): Map<String, Map<String, String>> {
@@ -61,7 +59,8 @@ class LauncherIconTest {
         val nodes = document.getElementsByTagName("path")
         return (0 until nodes.length).associate { index ->
             val attributes = nodes.item(index).attributes
-            val byName = (0 until attributes.length).associate { attributes.item(it).nodeName to attributes.item(it).nodeValue }
+            val byName =
+                (0 until attributes.length).associate { attributes.item(it).nodeName to attributes.item(it).nodeValue }
             byName.getValue("android:name") to byName
         }
     }
@@ -69,15 +68,18 @@ class LauncherIconTest {
     // Coordinates in tenths of a dp keep the pathData free of floating point noise.
     private fun cellsPath(cells: List<MotifCell>): String =
         cells.joinToString("") { cell ->
-            val size = dp(CELL_TENTHS - 2 * INSET_TENTHS)
-            "M${dp(x(cell, INSET_TENTHS))},${dp(y(cell, INSET_TENTHS))}h${size}v${size}h-${size}z"
+            val size = pathNumber(CELL_TENTHS - 2 * INSET_TENTHS)
+            val x = pathNumber(xTenths(cell, INSET_TENTHS))
+            val y = pathNumber(yTenths(cell, INSET_TENTHS))
+            "M$x,${y}h${size}v${size}h-${size}z"
         }
 
-    private fun x(cell: MotifCell, offset: Int): Int = (ORIGIN_COL + cell.col) * CELL_TENTHS + offset
+    private fun xTenths(cell: MotifCell, offset: Int): Int = (ORIGIN_COL + cell.col) * CELL_TENTHS + offset
 
-    private fun y(cell: MotifCell, offset: Int): Int = (ORIGIN_ROW + cell.row) * CELL_TENTHS + offset
+    private fun yTenths(cell: MotifCell, offset: Int): Int = (ORIGIN_ROW + cell.row) * CELL_TENTHS + offset
 
-    private fun dp(tenths: Int): String = if (tenths % 10 == 0) "${tenths / 10}" else "${tenths / 10}.${tenths % 10}"
+    private fun pathNumber(tenths: Int): String =
+        if (tenths % 10 == 0) "${tenths / 10}" else "${tenths / 10}.${tenths % 10}"
 
     private companion object {
         /** Motif placement on the 108 dp icon grid of 3 dp Cells. */

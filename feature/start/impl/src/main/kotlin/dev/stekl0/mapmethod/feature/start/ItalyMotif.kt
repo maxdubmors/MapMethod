@@ -1,21 +1,20 @@
 package dev.stekl0.mapmethod.feature.start
 
-/** One Cell of [ItalyMotif] in fill order. */
+/** One Cell of [ItalyMotif]. */
 public data class MotifCell(
-    val orderIndex: Int,
     val row: Int,
     val col: Int,
-    val shaded: Boolean,
+    val filled: Boolean,
 )
 
 /**
  * Italy drawn as Cells, the reference motif of the launcher icon and the Start animation:
  * 16 columns (west to east) by 19 rows (north to south), mainland with Sardinia and Sicily.
- * The first [SHADED_COUNT] Cells in fill order are shaded in graphite, the rest stay empty,
+ * The first [FILLED_COUNT] Cells in fill order are filled in graphite, the rest stay empty,
  * so the motif shows a Map being filled from the north.
  */
 public object ItalyMotif {
-    public const val SHADED_COUNT: Int = 50
+    public const val FILLED_COUNT: Int = 50
 
     public val rows: List<String> =
         listOf(
@@ -46,8 +45,7 @@ public object ItalyMotif {
         rows.forEachIndexed { row, line ->
             line.forEachIndexed { col, mark ->
                 if (mark == '1') {
-                    val order = cells.size
-                    cells.add(MotifCell(orderIndex = order, row = row, col = col, shaded = order < SHADED_COUNT))
+                    cells.add(MotifCell(row = row, col = col, filled = cells.size < FILLED_COUNT))
                 }
             }
         }
