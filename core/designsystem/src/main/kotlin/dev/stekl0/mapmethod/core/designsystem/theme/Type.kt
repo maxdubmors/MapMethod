@@ -1,4 +1,4 @@
-package dev.stekl0.mapmethod.ui.theme
+package dev.stekl0.mapmethod.core.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

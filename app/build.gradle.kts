@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
     implementation(project(":feature:map:api"))
     implementation(project(":feature:map:impl"))

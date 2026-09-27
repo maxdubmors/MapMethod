@@ -1,4 +1,4 @@
-package dev.stekl0.mapmethod.ui.theme
+package dev.stekl0.mapmethod.core.designsystem.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -8,6 +8,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme =
@@ -57,9 +58,13 @@ public fun MapMethodTheme(
             }
         }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content,
-    )
+    // Design tokens beyond MaterialTheme are provided here as static composition locals,
+    // cf. NiA NiaTheme providing LocalBackgroundTheme and LocalTintTheme. None are defined yet.
+    CompositionLocalProvider {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content,
+        )
+    }
 }
