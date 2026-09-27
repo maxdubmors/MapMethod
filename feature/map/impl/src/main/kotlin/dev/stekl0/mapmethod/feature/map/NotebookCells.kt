@@ -27,9 +27,8 @@ internal fun notebookCells(
         NotebookCell(row = cell.row, col = cell.col, mark = mark)
     }
 
-/** The confetti of Completion: small Cells in the flag colours plus graphite. */
-internal fun confettiColors(palette: NotebookPalette): List<Color> =
-    FlagBand.entries.map { flagColor(it, palette) } + palette.graphite
+/** The confetti of Completion: small Cells in the flag colours. */
+internal fun confettiColors(palette: NotebookPalette): List<Color> = FlagBand.entries.map { flagColor(it, palette) }
 
 private fun flagColor(band: FlagBand, palette: NotebookPalette) =
     when (band) {

@@ -65,9 +65,9 @@ class NotebookCellsTest {
     }
 
     @Test
-    fun `confetti comes in the three flag colours and graphite`() {
+    fun `confetti comes in the three flag colours only`() {
         assertEquals(
-            listOf(palette.flagBlue, palette.flagWhite, palette.flagRed, palette.graphite),
+            listOf(palette.flagBlue, palette.flagWhite, palette.flagRed),
             confettiColors(palette),
         )
     }
