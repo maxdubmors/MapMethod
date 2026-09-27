@@ -4,19 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import kotlin.math.max
 
-/** Pixel geometry of the grid inside a viewport of the given size. */
-internal data class GridMetrics(
-    val cell: Float,
-    val width: Float,
-    val height: Float,
-)
-
-internal fun gridMetrics(viewport: Size, rows: Int, cols: Int): GridMetrics {
-    if ((rows <= 0) || (cols <= 0)) return GridMetrics(cell = 0f, width = 0f, height = 0f)
-    val cell = minOf(viewport.width / cols, viewport.height / rows)
-    return GridMetrics(cell = cell, width = cell * cols, height = cell * rows)
-}
-
 /** Clamps a pan offset symmetrically so scaled content cannot leave empty viewport edges. */
 internal fun clampZoomOffset(
     offset: Offset,

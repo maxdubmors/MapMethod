@@ -96,6 +96,27 @@ class MapMethodThemeTest {
         }
     }
 
+    @Test
+    fun notebookPaletteFollowsDarkThemeButNeverTheWallpaper() {
+        val palettes = mutableMapOf<Pair<Boolean, Boolean>, NotebookPalette>()
+        composeRule.setContent {
+            for (darkTheme in listOf(false, true)) {
+                for (dynamicColor in listOf(false, true)) {
+                    MapMethodTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
+                        palettes[darkTheme to dynamicColor] = LocalNotebookPalette.current
+                    }
+                }
+            }
+        }
+
+        composeRule.runOnIdle {
+            assertEquals(NotebookPalette.Light, palettes[false to false])
+            assertEquals(NotebookPalette.Light, palettes[false to true])
+            assertEquals(NotebookPalette.Dark, palettes[true to false])
+            assertEquals(NotebookPalette.Dark, palettes[true to true])
+        }
+    }
+
     private fun backgroundPixel(): Int {
         val pixels = composeRule.onRoot().captureToImage().toPixelMap()
         return pixels[pixels.width - 1, pixels.height / 2].toArgb()
