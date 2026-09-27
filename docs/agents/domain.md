@@ -1,28 +1,37 @@
 # Domain Docs
 
-## Layout
+How the engineering skills should consume this repo's domain documentation when exploring the codebase.
 
-This repository uses a single-context layout:
+## Before exploring, read these
 
-- Root `CONTEXT.md`: the domain model and glossary.
-- `docs/adr/`: architecture decisions.
+- **`CONTEXT.md`** at the repo root.
+- **`docs/adr/`**: read ADRs that touch the area you're about to work in.
 
-## Before exploring the codebase
+If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
-Read the root `CONTEXT.md` and ADRs relevant to the area you are working in.
+## File structure
 
-If these documents do not exist, proceed silently: do not flag their absence
-or suggest creating them upfront. The `/domain-modeling` skill creates them
-as terms and decisions are agreed upon.
+This is a single-context repo:
 
-## Vocabulary
+```
+/
+├── CONTEXT.md
+├── docs/adr/
+│   ├── 0001-<decision>.md
+│   └── 0002-<decision>.md
+├── app/
+├── core/
+└── feature/
+```
 
-Use terms from `CONTEXT.md` in issues, proposals, hypotheses, and test names.
+## Use the glossary's vocabulary
 
-If a concept is missing, check whether the project actually uses it.
-Note a real gap for `/domain-modeling`.
+When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
 
-## ADR conflicts
+If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 
-If a proposal contradicts an existing ADR, explicitly identify
-the decision number and explain why you propose revisiting it.
+## Flag ADR conflicts
+
+If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
+
+> _Contradicts ADR-0007 (event-sourced orders), but worth reopening because…_

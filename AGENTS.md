@@ -4,12 +4,18 @@ Avoid directly accessing .gradle; instead, proactively use ksrc cli to inspect s
 
 ### Issue tracker
 
-Issues and specs live in GitHub Issues. Before working with them, read `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues on `maxdubmors/MapMethod` (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-The five default triage labels are used. Before classifying issues, read `docs/agents/triage-labels.md`.
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-The layout is single-context: a root `CONTEXT.md` and `docs/adr/`. Before exploring the codebase, read `docs/agents/domain.md`.
+Single-context: one `CONTEXT.md` plus `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+<!-- echolot -->
+## Performance work: echolot
+
+This project uses [echolot](https://github.com/grishan0v/echolot) to find where
+…  (`echolot guide` prints the rest)

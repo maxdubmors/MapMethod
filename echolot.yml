@@ -1,0 +1,45 @@
+project:
+  package: dev.stekl0.mapmethod
+  _source: derived
+  _evidence: "app/build.gradle.kts: applicationId; debug adds .debug suffix (overridden in local.yml)"
+  process: "dev.stekl0.mapmethod*"
+  _process_evidence: "manifest: no android:process; probe: single app process dev.stekl0.mapmethod.debug (pid 4625)"
+  source_root: app/src/main/kotlin
+
+scenario:
+  name: coldStart
+  _source: confirmed_by_user
+  _evidence: "no MacrobenchmarkRule module; cold start via runner.mode launch"
+  start:
+    name: "bindApplication"
+    _source: derived
+    _evidence: "probe: 1 match on main thread, 293.6 ms, first app slice of the cold start"
+  end:
+    name: "traversal"
+    _source: confirmed_by_user
+    _evidence: "probe: first traversal ends @ 1089 ms after bindApplication — first frame of StartScreen (Choreographer#doFrame 512 ms); Choreographer#doFrame* would close on an early frame @ 304 ms, before activityResume"
+  budget_ms: null
+  _budget_source: confirmed_by_user
+  _budget_evidence: "only baseline so far is emulator + debug build (1089 ms window, am start -W 1333 ms); set after a release run on a physical device"
+
+runner:
+  mode: launch
+  iterations: 5
+  duration_ms: 12000
+  reset_policy: force-stop
+  environment: true
+
+# detectors: omitted on purpose — shipped defaults until `echolot calibrate`
+# runs on 3–5 known-healthy traces from the target device.
+
+instrumentation:
+  allowed: ["app/src/main", "core/*/src/main", "feature/*/*/src/main"]
+  _source: confirmed_by_user
+  temp_prefix: AGENTTMP_
+  cleanup: always
+
+domains: []   # `echolot domains --root .`: 0 tracing calls across 2501 lines
+
+loop:
+  max_rounds: 3
+  on_exhausted: report

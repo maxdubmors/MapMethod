@@ -47,3 +47,7 @@ captures/
 
 # Kotlin
 .kotlin
+
+# Echolot
+.echolot/
+local.yml
