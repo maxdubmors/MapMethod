@@ -14,15 +14,16 @@ public class MapViewModel
     @Inject
     constructor(
         private val repository: MapRepository,
-    ) : ViewModel(), OrbitContainerHost<MapUiState, MapUiState, Nothing> {
-        override val container: OrbitContainer<MapUiState, MapUiState, Nothing> =
+    ) : ViewModel(), OrbitContainerHost<MapUiState, MapUiState, MapEvent> {
+        override val container: OrbitContainer<MapUiState, MapUiState, MapEvent> =
             orbitContainer(initialState = MapUiState.EMPTY) {
                 repository.observeCells().collect { cells -> reduce { cells.toUiState() } }
             }
 
         public fun logPushUps(count: Int) {
             intent {
-                repository.logPushUps(count).let { _ -> }
+                val filled = repository.logPushUps(count)
+                if (filled.isNotEmpty()) postSideEffect(MapEvent.LogFilled(orderIndexes = filled))
             }
         }
     }

@@ -20,17 +20,22 @@ internal class FakeCellDao(
         this.cells.value += cells.filter { it.orderIndex !in known }
     }
 
-    override suspend fun fillNext(count: Int, filledAt: Long): Int {
+    override suspend fun fillNext(count: Int, filledAt: Long): List<Int> {
         fillCalls++
-        val targets =
-            cells.value
-                .asSequence()
-                .filter { it.filledAt == null }
-                .sortedBy { it.orderIndex }
-                .take(count.coerceAtLeast(0))
-                .map { it.orderIndex }
-                .toSet()
-        if (targets.isEmpty()) return 0
+        return super.fillNext(count, filledAt)
+    }
+
+    override suspend fun nextEmptyOrderIndexes(count: Int): List<Int> =
+        cells.value
+            .asSequence()
+            .filter { it.filledAt == null }
+            .sortedBy { it.orderIndex }
+            .take(count.coerceAtLeast(0))
+            .map { it.orderIndex }
+            .toList()
+
+    override suspend fun markNextFilled(count: Int, filledAt: Long): Int {
+        val targets = nextEmptyOrderIndexes(count).toSet()
         cells.value =
             cells.value.map {
                 if (it.orderIndex in targets) it.copy(filledAt = filledAt) else it

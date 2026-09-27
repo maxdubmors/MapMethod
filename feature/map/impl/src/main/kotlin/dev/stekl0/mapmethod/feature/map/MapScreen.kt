@@ -41,8 +41,9 @@ private val MinZoom = 1f
 private val MaxZoom = 4f
 
 @Composable
-public fun MapScreen(
+internal fun MapScreen(
     state: MapUiState,
+    cascade: LogCascadeState,
     onLogCount: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -60,6 +61,7 @@ public fun MapScreen(
     ) {
         MapCanvas(
             state = state,
+            cascade = cascade,
             previewCount = count,
             modifier =
                 Modifier
@@ -81,6 +83,7 @@ public fun MapScreen(
 @Composable
 private fun MapCanvas(
     state: MapUiState,
+    cascade: LogCascadeState,
     previewCount: Int?,
     modifier: Modifier = Modifier,
 ) {
@@ -102,6 +105,7 @@ private fun MapCanvas(
                 palette = palette,
             )
         }
+    val stampClock = cascade.rememberStampClock(cells)
     val transform =
         rememberTransformableState { _, zoomChange, panChange, _ ->
             scale = (scale * zoomChange).coerceIn(MinZoom, MaxZoom)
@@ -120,6 +124,7 @@ private fun MapCanvas(
         rows = rows,
         cols = cols,
         cells = notebookCells,
+        stampClock = stampClock,
         modifier =
             modifier
                 // Outside the zoom layer, so the scaled sheet never spills over the controls.

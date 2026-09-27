@@ -50,7 +50,8 @@ public data class NotebookCell(
 /**
  * A grid of [rows] by [cols] Cells on notebook paper, centred in the canvas. The faint grid covers
  * the whole canvas, aligned with the Cells, so it keeps running to the edges under zoom and pan.
- * Only [cells] belong to the country; the rest of the grid is bare paper.
+ * Only [cells] belong to the country; the rest of the grid is bare paper. Filled Cells stamp in as
+ * [stampClock] says; without one they are all drawn stamped.
  */
 @Composable
 public fun NotebookCellGrid(
@@ -58,6 +59,7 @@ public fun NotebookCellGrid(
     cols: Int,
     cells: List<NotebookCell>,
     modifier: Modifier = Modifier,
+    stampClock: StampClock? = null,
 ) {
     val palette = LocalNotebookPalette.current
     Canvas(modifier = modifier) {
@@ -65,22 +67,48 @@ public fun NotebookCellGrid(
         if ((rows <= 0) || (cols <= 0)) return@Canvas
         val metrics = gridMetrics(size, rows, cols)
         val origin = Offset((size.width - metrics.width) / 2f, (size.height - metrics.height) / 2f)
-        drawCells(cells, metrics.cell, origin, palette)
+        drawCells(cells, metrics.cell, origin, palette, stampClock)
         drawGridLines(metrics.cell, origin, palette.gridLine)
         drawPreviewOutlines(cells, metrics.cell, origin, palette.previewOutline)
     }
 }
 
-private fun DrawScope.drawCells(cells: List<NotebookCell>, cellSide: Float, origin: Offset, palette: NotebookPalette) {
+private fun DrawScope.drawCells(
+    cells: List<NotebookCell>,
+    cellSide: Float,
+    origin: Offset,
+    palette: NotebookPalette,
+    stampClock: StampClock?,
+) {
     val cellSize = Size(cellSide, cellSide)
-    for (notebookCell in cells) {
-        val color =
-            when (val mark = notebookCell.mark) {
-                CellMark.Empty, CellMark.Preview -> palette.countryTint
-                is CellMark.Filled -> mark.color
+    cells.forEachIndexed { index, notebookCell ->
+        val topLeft = cellTopLeft(notebookCell, cellSide, origin)
+        val mark = notebookCell.mark
+        val playTime = if (mark is CellMark.Filled) stampClock?.playTimeMillis(index) ?: CellStampMillis else 0L
+        when {
+            mark !is CellMark.Filled -> {
+                drawRect(color = palette.countryTint, topLeft = topLeft, size = cellSize)
             }
-        drawRect(color = color, topLeft = cellTopLeft(notebookCell, cellSide, origin), size = cellSize)
+
+            playTime >= CellStampMillis -> {
+                drawRect(color = mark.color, topLeft = topLeft, size = cellSize)
+            }
+
+            else -> {
+                drawRect(color = palette.countryTint, topLeft = topLeft, size = cellSize)
+                drawStamp(mark.color, topLeft, cellSide, playTime)
+            }
+        }
     }
+}
+
+// The fill grows from the Cell's centre; at the overshoot it slightly passes the Cell's edge, like a pencil stroke.
+private fun DrawScope.drawStamp(color: Color, cellTopLeft: Offset, cellSide: Float, playTimeMillis: Long) {
+    val alpha = stampAlpha(playTimeMillis)
+    if (alpha <= 0f) return
+    val side = cellSide * stampScale(playTimeMillis)
+    val inset = (cellSide - side) / 2f
+    drawRect(color = color, topLeft = cellTopLeft + Offset(inset, inset), size = Size(side, side), alpha = alpha)
 }
 
 private fun DrawScope.drawGridLines(cellSide: Float, origin: Offset, color: Color) {

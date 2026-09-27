@@ -37,7 +37,7 @@ class MapRepositoryTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
 
-            assertEquals(2, repository.logPushUps(2))
+            assertEquals(listOf(0, 1), repository.logPushUps(2))
 
             var received = emptyList<Cell>()
             val job = launch { repository.observeCells().collect { received = it } }
@@ -53,7 +53,7 @@ class MapRepositoryTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
 
-            assertEquals(3, repository.logPushUps(5))
+            assertEquals(listOf(0, 1, 2), repository.logPushUps(5))
 
             var received = emptyList<Cell>()
             val job = launch { repository.observeCells().collect { received = it } }
@@ -69,7 +69,7 @@ class MapRepositoryTest {
             val dao = FakeCellDao(entities())
             val repository: MapRepository = MapRepositoryImpl(dao)
 
-            assertEquals(0, repository.logPushUps(0))
+            assertEquals(emptyList<Int>(), repository.logPushUps(0))
 
             var received = emptyList<Cell>()
             val job = launch { repository.observeCells().collect { received = it } }
@@ -80,12 +80,22 @@ class MapRepositoryTest {
         }
 
     @Test
-    fun `logPushUps on a full map returns zero without writing`() =
+    fun `logPushUps after an earlier Log returns only the Cells it filled`() =
+        runTest {
+            val dao = FakeCellDao(entities())
+            val repository: MapRepository = MapRepositoryImpl(dao)
+            repository.logPushUps(1)
+
+            assertEquals(listOf(1, 2), repository.logPushUps(2))
+        }
+
+    @Test
+    fun `logPushUps on a full Map returns nothing without writing`() =
         runTest {
             val dao = FakeCellDao(listOf(CellEntity(orderIndex = 0, row = 0, col = 0, filledAt = 1L)))
             val repository: MapRepository = MapRepositoryImpl(dao)
 
-            assertEquals(0, repository.logPushUps(3))
+            assertEquals(emptyList<Int>(), repository.logPushUps(3))
             assertEquals(1, dao.fillCalls)
         }
 }
