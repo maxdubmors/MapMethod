@@ -30,8 +30,9 @@ public fun MapMethodTheme(
         }
 
     // Design tokens beyond MaterialTheme are provided here as static composition locals,
-    // cf. NiA NiaTheme providing LocalBackgroundTheme and LocalTintTheme. None are defined yet.
-    CompositionLocalProvider {
+    // cf. NiA NiaTheme providing LocalBackgroundTheme and LocalTintTheme.
+    val notebookPalette = if (darkTheme) NotebookPalette.Dark else NotebookPalette.Light
+    CompositionLocalProvider(LocalNotebookPalette provides notebookPalette) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,

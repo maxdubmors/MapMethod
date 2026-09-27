@@ -56,8 +56,8 @@ Compose:
     # treatAsComposableLambda: MyComposableLambdaType
   CompositionLocalAllowlist:
     active: true
-    # -- You can optionally define a list of CompositionLocals that are allowed here
-    # allowedCompositionLocals: LocalSomething,LocalSomethingElse
+    # Design tokens beyond MaterialTheme, provided by MapMethodTheme (cf. NiA LocalTintTheme).
+    allowedCompositionLocals: LocalNotebookPalette
   CompositionLocalNaming:
     active: true
   ConditionHoist:

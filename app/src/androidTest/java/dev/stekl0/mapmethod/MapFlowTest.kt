@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -17,7 +18,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
+import androidx.test.platform.app.InstrumentationRegistry
+import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -25,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import dev.stekl0.mapmethod.feature.map.R as MapR
 
 class MapFlowTest {
     @get:Rule
@@ -33,12 +38,7 @@ class MapFlowTest {
     private data class Progress(val filled: Int, val total: Int)
 
     private fun progress(): Progress {
-        val text =
-            compose.onNodeWithTag("progress")
-                .fetchSemanticsNode()
-                .config[SemanticsProperties.Text]
-                .first()
-                .text
+        val text = progressText()
         val match = checkNotNull(Regex("Filled (\\d+) of (\\d+)").find(text)) { "Unexpected progress: $text" }
         return Progress(filled = match.groupValues[1].toInt(), total = match.groupValues[2].toInt())
     }
@@ -51,11 +51,69 @@ class MapFlowTest {
             compose.onAllNodesWithTag("mapCanvas").fetchSemanticsNodes().isNotEmpty()
         }
         // A fresh install seeds the Map off the main thread; wait for its Cells.
-        compose.waitUntil(timeoutMillis = 10_000) { progress().total > 0 }
+        compose.waitUntil(timeoutMillis = 10_000) { (progressText() == completionText()) || (progress().total > 0) }
     }
 
     private fun waitForFilled(filled: Int) {
         compose.waitUntil(timeoutMillis = 10_000) { progress().filled == filled }
+    }
+
+    private fun progressText(): String =
+        compose.onNodeWithTag("progress")
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.Text]
+            .first()
+            .text
+
+    private fun completionText(): String = targetContext().getString(MapR.string.feature_map_impl_complete)
+
+    private fun waitForCompletion() {
+        compose.waitUntil(timeoutMillis = 10_000) { progressText() == completionText() }
+    }
+
+    private fun entryText(): String =
+        compose.onNodeWithTag("logField")
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.EditableText]
+            .text
+
+    // The Log button reads "Log N push-ups"; N is the count a Log will record.
+    private fun logButtonCount(): Int {
+        val text =
+            compose.onNodeWithTag("logButton")
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.Text]
+                .joinToString(" ") { it.text }
+        return checkNotNull(Regex("(\\d+)").find(text)) { "Unexpected Log label: $text" }.value.toInt()
+    }
+
+    private fun progressBarValue(): Float =
+        compose.onNodeWithTag("progressBar")
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.ProgressBarRangeInfo]
+            .current
+
+    private fun targetContext() = InstrumentationRegistry.getInstrumentation().targetContext
+
+    // The Map is drawn in the notebook palette of the system theme the app follows.
+    private fun palette(): NotebookPalette {
+        val nightMode = targetContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return if (nightMode == Configuration.UI_MODE_NIGHT_YES) NotebookPalette.Dark else NotebookPalette.Light
+    }
+
+    private fun mapPixels(): IntArray {
+        val bitmap = compose.onNodeWithTag("mapCanvas").captureToImage().asAndroidBitmap()
+        val pixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        return pixels
+    }
+
+    private fun assertMapInFlagColours() {
+        compose.waitForIdle()
+        val pixels = mapPixels().toSet()
+        assertTrue(palette().flagWhite.toArgb() in pixels)
+        assertTrue(palette().flagRed.toArgb() in pixels)
+        assertFalse(palette().graphite.toArgb() in pixels)
     }
 
     @Test
@@ -111,24 +169,110 @@ class MapFlowTest {
     }
 
     @Test
-    fun stepperPlusFiveFromDefaultFillsSix() {
+    fun minusAndPlusStepTheEntryByOne() {
         goToMap()
 
-        compose.onNodeWithTag("stepPlus5").performClick()
+        compose.onNodeWithTag("stepPlus1").performClick()
+        compose.onNodeWithTag("stepPlus1").performClick()
+        assertEquals("3", entryText())
+        compose.onNodeWithTag("stepMinus1").performClick()
+        assertEquals("2", entryText())
+        compose.waitForIdle()
+        assertEquals(2, logButtonCount())
+
         compose.onNodeWithTag("logButton").performClick()
-        waitForFilled(6)
+        waitForFilled(2)
     }
 
     @Test
-    fun logAboveRemainingFillsWholeMap() {
+    fun minusStopsAtOne() {
+        goToMap()
+
+        compose.onNodeWithTag("stepMinus1").performClick()
+        assertEquals("1", entryText())
+    }
+
+    @Test
+    fun chipsAddFiveAndTenAndLogFillsTheShownCount() {
+        goToMap()
+
+        compose.onNodeWithTag("chipPlus10").performClick()
+        compose.onNodeWithTag("chipPlus5").performClick()
+        assertEquals("16", entryText())
+        compose.waitForIdle()
+        val shown = logButtonCount()
+        assertEquals(16, shown)
+
+        compose.onNodeWithTag("logButton").performClick()
+        waitForFilled(shown)
+    }
+
+    @Test
+    fun progressBarAndCounterSettleAfterLog() {
+        goToMap()
+        val total = progress().total
+        assertEquals(0f, progressBarValue())
+
+        compose.onNodeWithTag("logField").performTextReplacement("5")
+        compose.onNodeWithTag("logButton").performClick()
+        waitForFilled(5)
+        compose.waitForIdle()
+
+        assertEquals(Progress(filled = 5, total = total), progress())
+        assertEquals(5f / total, progressBarValue(), 1e-6f)
+    }
+
+    @Test
+    fun inProgressMapShowsFilledCellsInGraphite() {
+        goToMap()
+        compose.onNodeWithTag("logField").performTextReplacement("5")
+        compose.waitForIdle()
+        val graphiteBefore = mapPixels().count { it == palette().graphite.toArgb() }
+
+        compose.onNodeWithTag("logButton").performClick()
+        waitForFilled(5)
+        compose.waitForIdle()
+
+        val pixels = mapPixels()
+        assertTrue(pixels.count { it == palette().graphite.toArgb() } > graphiteBefore)
+        assertFalse(palette().flagRed.toArgb() in pixels)
+    }
+
+    @Test
+    fun logAboveRemainingClampsAndCompletesMapInFlagColours() {
         goToMap()
         val total = progress().total
 
         compose.onNodeWithTag("logField").performTextReplacement("99999")
+        assertEquals(total.toString(), entryText())
         compose.onNodeWithTag("logButton").performClick()
-        waitForFilled(total)
+        waitForCompletion()
 
         compose.onNodeWithTag("logButton").assertIsNotEnabled()
+        compose.onNodeWithTag("logField").assertIsNotEnabled()
+        compose.onNodeWithTag("stepMinus1").assertIsNotEnabled()
+        compose.onNodeWithTag("stepPlus1").assertIsNotEnabled()
+        compose.onNodeWithTag("chipPlus5").assertIsNotEnabled()
+        compose.onNodeWithTag("chipPlus10").assertIsNotEnabled()
+        assertEquals(1f, progressBarValue())
+        assertMapInFlagColours()
+    }
+
+    @Test
+    fun reopeningCompleteMapShowsItInFlagColours() {
+        goToMap()
+        compose.onNodeWithTag("logField").performTextReplacement("99999")
+        compose.onNodeWithTag("logButton").performClick()
+        waitForCompletion()
+
+        // Leave the app for good, then open it again from the launcher.
+        compose.activityRule.scenario.close()
+        ActivityScenario.launch(MainActivity::class.java).use {
+            goToMap()
+            waitForCompletion()
+
+            assertMapInFlagColours()
+        }
     }
 
     @Test
@@ -150,12 +294,7 @@ class MapFlowTest {
             compose.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         }
 
-        val text =
-            compose.onNodeWithTag("logField")
-                .fetchSemanticsNode()
-                .config[SemanticsProperties.EditableText]
-                .text
-        assertEquals("7", text)
+        assertEquals("7", entryText())
     }
 
     @Test

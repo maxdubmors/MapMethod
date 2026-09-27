@@ -4,4 +4,7 @@
     <string name="feature_map_impl_log_push_ups_empty">Log push-ups</string>
     <string name="feature_map_impl_log_count_label">Push-ups</string>
     <string name="feature_map_impl_progress">Filled %1$d of %2$d</string>
+    <string name="feature_map_impl_complete">Map complete: every Cell is filled</string>
+    <string name="feature_map_impl_step_minus_one">Decrease by one</string>
+    <string name="feature_map_impl_step_plus_one">Increase by one</string>
 </resources>

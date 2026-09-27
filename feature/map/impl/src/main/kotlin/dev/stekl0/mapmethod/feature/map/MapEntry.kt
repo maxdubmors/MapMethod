@@ -6,11 +6,20 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.stekl0.mapmethod.feature.map.api.MapNavKey
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 public fun EntryProviderScope<NavKey>.mapEntry() {
     entry<MapNavKey> {
         val viewModel: MapViewModel = hiltViewModel()
         val state by viewModel.collectAsState()
-        MapScreen(state = state, onLogCount = viewModel::logPushUps)
+        val cascade = rememberLogCascadeState(state)
+        val completion = rememberCompletionState(state)
+        viewModel.collectSideEffect { event ->
+            when (event) {
+                is MapEvent.LogFilled -> cascade.play(event.orderIndexes)
+                MapEvent.Completion -> completion.play(cascade)
+            }
+        }
+        MapScreen(state = state, cascade = cascade, completion = completion, onLogCount = viewModel::logPushUps)
     }
 }
