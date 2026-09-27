@@ -8,8 +8,8 @@ plugins {
 android {
     defaultConfig {
         applicationId = "dev.stekl0.mapmethod"
-        versionCode = 3
-        versionName = "0.2.0" // X.Y.Z; X = Major, Y = minor, Z = Patch level
+        versionCode = 1
+        versionName = "0.1.0" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // With the orchestrator below, every instrumented test starts from a fresh, empty Map.

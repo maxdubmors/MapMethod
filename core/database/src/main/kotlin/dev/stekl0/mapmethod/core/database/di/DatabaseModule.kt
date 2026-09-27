@@ -8,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.stekl0.mapmethod.core.database.MapDatabase
-import dev.stekl0.mapmethod.core.database.MapDatabaseMigration1To2
 import dev.stekl0.mapmethod.core.database.dao.CellDao
 import dev.stekl0.mapmethod.core.database.seedDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +28,7 @@ internal object DatabaseModule {
             Room.databaseBuilder<MapDatabase>(
                 context,
                 "mapmethod-database",
-            ).addMigrations(MapDatabaseMigration1To2).build()
+            ).build()
         // Prefill once: inserts ignore existing rows, so this is a no-op
         // on every launch after the first. Runs off the main thread.
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {

@@ -20,7 +20,7 @@ class CellSeederTest {
             val job = launch { dao.observeCells().collect { received = it } }
             testScheduler.advanceUntilIdle()
 
-            assertEquals(PolandMask.entities(), received)
+            assertEquals(FranceMask.entities(), received)
             job.cancel()
         }
 
@@ -36,26 +36,34 @@ class CellSeederTest {
             val job = launch { dao.observeCells().collect { received = it } }
             testScheduler.advanceUntilIdle()
 
-            assertEquals(PolandMask.entities(), received)
+            assertEquals(FranceMask.entities(), received)
             job.cancel()
         }
 
     @Test
-    fun `mask is sixty by sixty over the same bounding box`() {
-        assertEquals(60, PolandMask.rows.size)
-        assertTrue(PolandMask.rows.all { it.length == 60 })
+    fun `mask is thirteen rows by fourteen columns`() {
+        assertEquals(13, FranceMask.rows.size)
+        assertTrue(FranceMask.rows.all { it.length == 14 })
     }
 
     @Test
-    fun `mask holds on the order of two to three thousand cells`() {
-        val total = PolandMask.entities().size
+    fun `mask is cropped to its own bounds`() {
+        val entities = FranceMask.entities()
 
-        assertTrue(total in (2000..3000))
+        assertEquals(0, entities.minOf { it.row })
+        assertEquals(12, entities.maxOf { it.row })
+        assertEquals(0, entities.minOf { it.col })
+        assertEquals(13, entities.maxOf { it.col })
+    }
+
+    @Test
+    fun `mask holds the method's hundred cells`() {
+        assertEquals(100, FranceMask.entities().size)
     }
 
     @Test
     fun `mask order is dense row-major north to south west to east`() {
-        val entities = PolandMask.entities()
+        val entities = FranceMask.entities()
 
         assertTrue(entities.isNotEmpty())
         assertEquals(entities.indices.toList(), entities.map { it.orderIndex })
