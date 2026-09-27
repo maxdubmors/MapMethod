@@ -17,8 +17,11 @@ public data class MapUiState(
     val filledCount: Int,
     val totalCount: Int,
 ) {
+    /** The Map's Cells have been read; before that it has none. */
+    public val isLoaded: Boolean get() = totalCount > 0
+
     /** Completion: every Cell of a loaded Map is filled. */
-    public val isComplete: Boolean get() = (totalCount > 0) && (filledCount == totalCount)
+    public val isComplete: Boolean get() = isLoaded && (filledCount == totalCount)
 
     public companion object {
         public val EMPTY: MapUiState = MapUiState(cells = emptyList(), filledCount = 0, totalCount = 0)

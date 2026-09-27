@@ -77,6 +77,22 @@ class MapFlowTest {
             .config[SemanticsProperties.EditableText]
             .text
 
+    // The Log button reads "Log N push-ups"; N is the count a Log will record.
+    private fun logButtonCount(): Int {
+        val text =
+            compose.onNodeWithTag("logButton")
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.Text]
+                .joinToString(" ") { it.text }
+        return checkNotNull(Regex("(\\d+)").find(text)) { "Unexpected Log label: $text" }.value.toInt()
+    }
+
+    private fun progressBarValue(): Float =
+        compose.onNodeWithTag("progressBar")
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.ProgressBarRangeInfo]
+            .current
+
     private fun targetContext() = InstrumentationRegistry.getInstrumentation().targetContext
 
     // The Map is drawn in the notebook palette of the system theme the app follows.
@@ -153,12 +169,57 @@ class MapFlowTest {
     }
 
     @Test
-    fun stepperPlusFiveFromDefaultFillsSix() {
+    fun minusAndPlusStepTheEntryByOne() {
         goToMap()
 
-        compose.onNodeWithTag("stepPlus5").performClick()
+        compose.onNodeWithTag("stepPlus1").performClick()
+        compose.onNodeWithTag("stepPlus1").performClick()
+        assertEquals("3", entryText())
+        compose.onNodeWithTag("stepMinus1").performClick()
+        assertEquals("2", entryText())
+        compose.waitForIdle()
+        assertEquals(2, logButtonCount())
+
         compose.onNodeWithTag("logButton").performClick()
-        waitForFilled(6)
+        waitForFilled(2)
+    }
+
+    @Test
+    fun minusStopsAtOne() {
+        goToMap()
+
+        compose.onNodeWithTag("stepMinus1").performClick()
+        assertEquals("1", entryText())
+    }
+
+    @Test
+    fun chipsAddFiveAndTenAndLogFillsTheShownCount() {
+        goToMap()
+
+        compose.onNodeWithTag("chipPlus10").performClick()
+        compose.onNodeWithTag("chipPlus5").performClick()
+        assertEquals("16", entryText())
+        compose.waitForIdle()
+        val shown = logButtonCount()
+        assertEquals(16, shown)
+
+        compose.onNodeWithTag("logButton").performClick()
+        waitForFilled(shown)
+    }
+
+    @Test
+    fun progressBarAndCounterSettleAfterLog() {
+        goToMap()
+        val total = progress().total
+        assertEquals(0f, progressBarValue())
+
+        compose.onNodeWithTag("logField").performTextReplacement("5")
+        compose.onNodeWithTag("logButton").performClick()
+        waitForFilled(5)
+        compose.waitForIdle()
+
+        assertEquals(Progress(filled = 5, total = total), progress())
+        assertEquals(5f / total, progressBarValue(), 1e-6f)
     }
 
     @Test
@@ -189,7 +250,11 @@ class MapFlowTest {
 
         compose.onNodeWithTag("logButton").assertIsNotEnabled()
         compose.onNodeWithTag("logField").assertIsNotEnabled()
+        compose.onNodeWithTag("stepMinus1").assertIsNotEnabled()
         compose.onNodeWithTag("stepPlus1").assertIsNotEnabled()
+        compose.onNodeWithTag("chipPlus5").assertIsNotEnabled()
+        compose.onNodeWithTag("chipPlus10").assertIsNotEnabled()
+        assertEquals(1f, progressBarValue())
         assertMapInFlagColours()
     }
 

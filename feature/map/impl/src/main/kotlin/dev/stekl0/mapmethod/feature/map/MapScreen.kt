@@ -4,17 +4,11 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -30,8 +24,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import dev.stekl0.mapmethod.core.designsystem.theme.LocalNotebookPalette
@@ -40,8 +32,6 @@ import dev.stekl0.mapmethod.core.ui.gridMetrics
 
 private val ScreenPadding = 16.dp
 private val ContentSpacing = 12.dp
-private val StepperSpacing = 4.dp
-private val StepperButtonPadding = 8.dp
 
 // Non-const by design: const would trip standard:property-naming, PascalCase matches the dp tokens.
 @Suppress("MayBeConst")
@@ -77,15 +67,7 @@ public fun MapScreen(
                     .fillMaxWidth()
                     .testTag("mapCanvas"),
         )
-        Text(
-            text =
-                if (state.isComplete) {
-                    stringResource(R.string.feature_map_impl_complete)
-                } else {
-                    stringResource(R.string.feature_map_impl_progress, state.filledCount, state.totalCount)
-                },
-            modifier = Modifier.testTag("progress"),
-        )
+        MapProgress(state = state, modifier = Modifier.fillMaxWidth())
         LogControls(
             count = count,
             remaining = remaining,
@@ -93,83 +75,6 @@ public fun MapScreen(
             onEntryTextChange = { entryText = it },
             onLogCount = onLogCount,
         )
-    }
-}
-
-@Composable
-private fun LogControls(
-    count: Int?,
-    remaining: Int,
-    entryText: String,
-    onEntryTextChange: (String) -> Unit,
-    onLogCount: (Int) -> Unit,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(ContentSpacing),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        OutlinedTextField(
-            value = entryText,
-            onValueChange = { typed ->
-                if (typed.all(Char::isDigit)) onEntryTextChange(clampEntryText(typed, entryText, remaining))
-            },
-            label = { Text(text = stringResource(R.string.feature_map_impl_log_count_label)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            enabled = remaining > 0,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag("logField"),
-        )
-        StepperRow(
-            count = count,
-            remaining = remaining,
-            enabled = remaining > 0,
-            onStep = { onEntryTextChange(it.toString()) },
-        )
-        Button(
-            onClick = { count?.let(onLogCount) },
-            enabled = count != null,
-            modifier = Modifier.testTag("logButton"),
-        ) {
-            Text(
-                text =
-                    if (count != null) {
-                        stringResource(R.string.feature_map_impl_log_push_ups, count)
-                    } else {
-                        stringResource(R.string.feature_map_impl_log_push_ups_empty)
-                    },
-            )
-        }
-    }
-}
-
-private val StepSizes = listOf(-10, -5, -1, 1, 5, 10)
-
-@Composable
-private fun StepperRow(count: Int?, remaining: Int, enabled: Boolean, onStep: (Int) -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(StepperSpacing, Alignment.CenterHorizontally),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        for (step in StepSizes) {
-            StepperButton(step = step, current = count, remaining = remaining, enabled = enabled, onStep = onStep)
-        }
-    }
-}
-
-@Composable
-private fun StepperButton(step: Int, current: Int?, remaining: Int, enabled: Boolean, onStep: (Int) -> Unit) {
-    val label = if (step > 0) "+$step" else step.toString()
-    val tag = if (step > 0) "stepPlus$step" else "stepMinus${-step}"
-    OutlinedButton(
-        onClick = { onStep(stepLogCount(current = current, step = step, remaining = remaining)) },
-        enabled = enabled,
-        contentPadding = PaddingValues(horizontal = StepperButtonPadding),
-        modifier = Modifier.testTag(tag),
-    ) {
-        Text(text = label, maxLines = 1)
     }
 }
 
