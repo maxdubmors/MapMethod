@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class AppThemeInstrumentedTest {
+class MapMethodThemeTest {
     @get:Rule
     val composeRule = createComposeRule()
 
