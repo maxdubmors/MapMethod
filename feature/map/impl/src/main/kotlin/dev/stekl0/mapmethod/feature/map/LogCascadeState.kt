@@ -90,6 +90,11 @@ internal class LogCascadeState(
             }
     }
 
+    /** Returns once the cascade playing now, if any, has ended. */
+    suspend fun awaitEnd() {
+        playing?.join()
+    }
+
     // The event can arrive before the Map's state shows the Cells filled; until then they wait hidden.
     private suspend fun awaitFilled(lastOrderIndex: Int) {
         snapshotFlow { mapState.value }.first { state ->

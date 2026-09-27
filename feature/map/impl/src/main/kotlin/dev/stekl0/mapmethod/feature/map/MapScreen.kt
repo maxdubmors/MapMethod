@@ -3,6 +3,7 @@ package dev.stekl0.mapmethod.feature.map
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,39 +45,44 @@ private val MaxZoom = 4f
 internal fun MapScreen(
     state: MapUiState,
     cascade: LogCascadeState,
+    completion: CompletionState,
     onLogCount: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val remaining = state.totalCount - state.filledCount
     var entryText by rememberSaveable { mutableStateOf("1") }
     val count = if (remaining < 1) null else parseLogCount(entryText, remaining)
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .safeDrawingPadding()
-                .padding(ScreenPadding),
-        verticalArrangement = Arrangement.spacedBy(ContentSpacing),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        MapCanvas(
-            state = state,
-            cascade = cascade,
-            previewCount = count,
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
             modifier =
                 Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .testTag("mapCanvas"),
-        )
-        MapProgress(state = state, modifier = Modifier.fillMaxWidth())
-        LogControls(
-            count = count,
-            remaining = remaining,
-            entryText = entryText,
-            onEntryTextChange = { entryText = it },
-            onLogCount = onLogCount,
-        )
+                    .fillMaxSize()
+                    .safeDrawingPadding()
+                    .padding(ScreenPadding),
+            verticalArrangement = Arrangement.spacedBy(ContentSpacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            MapCanvas(
+                state = state,
+                cascade = cascade,
+                completion = completion,
+                previewCount = count,
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .testTag("mapCanvas"),
+            )
+            MapProgress(state = state, modifier = Modifier.fillMaxWidth())
+            LogControls(
+                count = count,
+                remaining = remaining,
+                entryText = entryText,
+                onEntryTextChange = { entryText = it },
+                onLogCount = onLogCount,
+            )
+        }
+        ConfettiOverlay(completion = completion, modifier = Modifier.matchParentSize())
     }
 }
 
@@ -84,6 +90,7 @@ internal fun MapScreen(
 private fun MapCanvas(
     state: MapUiState,
     cascade: LogCascadeState,
+    completion: CompletionState,
     previewCount: Int?,
     modifier: Modifier = Modifier,
 ) {
@@ -106,6 +113,7 @@ private fun MapCanvas(
             )
         }
     val stampClock = cascade.rememberStampClock(cells)
+    val recolour = completion.rememberCellRecolour(cells, palette.graphite)
     val transform =
         rememberTransformableState { _, zoomChange, panChange, _ ->
             scale = (scale * zoomChange).coerceIn(MinZoom, MaxZoom)
@@ -125,6 +133,7 @@ private fun MapCanvas(
         cols = cols,
         cells = notebookCells,
         stampClock = stampClock,
+        recolour = recolour,
         modifier =
             modifier
                 // Outside the zoom layer, so the scaled sheet never spills over the controls.

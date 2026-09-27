@@ -1,5 +1,6 @@
 package dev.stekl0.mapmethod.feature.map
 
+import androidx.compose.ui.graphics.Color
 import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
 import dev.stekl0.mapmethod.core.ui.CellMark
 import dev.stekl0.mapmethod.core.ui.NotebookCell
@@ -25,6 +26,10 @@ internal fun notebookCells(
             }
         NotebookCell(row = cell.row, col = cell.col, mark = mark)
     }
+
+/** The confetti of Completion: small Cells in the flag colours plus graphite. */
+internal fun confettiColors(palette: NotebookPalette): List<Color> =
+    FlagBand.entries.map { flagColor(it, palette) } + palette.graphite
 
 private fun flagColor(band: FlagBand, palette: NotebookPalette) =
     when (band) {

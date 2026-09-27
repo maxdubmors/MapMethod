@@ -12,4 +12,7 @@ public sealed interface MapEvent {
     public data class LogFilled(
         val orderIndexes: List<Int>,
     ) : MapEvent
+
+    /** Completion: the Log just before this event filled the Map's last Cell. */
+    public data object Completion : MapEvent
 }

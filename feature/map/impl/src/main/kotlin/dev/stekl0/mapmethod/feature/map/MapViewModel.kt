@@ -23,7 +23,10 @@ public class MapViewModel
         public fun logPushUps(count: Int) {
             intent {
                 val filled = repository.logPushUps(count)
-                if (filled.isNotEmpty()) postSideEffect(MapEvent.LogFilled(orderIndexes = filled))
+                if (filled.isEmpty()) return@intent
+                postSideEffect(MapEvent.LogFilled(orderIndexes = filled))
+                // Cells fill in fill order, so the Log that fills the last one completes the Map.
+                if (filled.last() == state.cells.maxOfOrNull { it.orderIndex }) postSideEffect(MapEvent.Completion)
             }
         }
     }

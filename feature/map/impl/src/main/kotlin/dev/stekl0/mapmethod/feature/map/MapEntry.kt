@@ -13,11 +13,13 @@ public fun EntryProviderScope<NavKey>.mapEntry() {
         val viewModel: MapViewModel = hiltViewModel()
         val state by viewModel.collectAsState()
         val cascade = rememberLogCascadeState(state)
+        val completion = rememberCompletionState(state)
         viewModel.collectSideEffect { event ->
             when (event) {
                 is MapEvent.LogFilled -> cascade.play(event.orderIndexes)
+                MapEvent.Completion -> completion.play(cascade)
             }
         }
-        MapScreen(state = state, cascade = cascade, onLogCount = viewModel::logPushUps)
+        MapScreen(state = state, cascade = cascade, completion = completion, onLogCount = viewModel::logPushUps)
     }
 }

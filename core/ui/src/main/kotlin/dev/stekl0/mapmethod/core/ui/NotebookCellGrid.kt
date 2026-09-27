@@ -39,6 +39,15 @@ public sealed interface CellMark {
     ) : CellMark
 }
 
+/**
+ * Changes the colour filled Cells are drawn in while it lasts. Read while drawing, like [StampClock],
+ * so a colour that changes every frame never recomposes the grid.
+ */
+public fun interface CellRecolour {
+    /** The colour to draw the filled Cell at [cellIndex] of the grid's cells in, instead of its mark's [color]. */
+    public fun colorOf(cellIndex: Int, color: Color): Color
+}
+
 /** A country's Cell at [row] and [col] of the grid, drawn as [mark]. */
 @Immutable
 public data class NotebookCell(
@@ -51,7 +60,8 @@ public data class NotebookCell(
  * A grid of [rows] by [cols] Cells on notebook paper, centred in the canvas. The faint grid covers
  * the whole canvas, aligned with the Cells, so it keeps running to the edges under zoom and pan.
  * Only [cells] belong to the country; the rest of the grid is bare paper. Filled Cells stamp in as
- * [stampClock] says; without one they are all drawn stamped.
+ * [stampClock] says; without one they are all drawn stamped. A [recolour] overrides the colour of
+ * filled Cells.
  */
 @Composable
 public fun NotebookCellGrid(
@@ -60,6 +70,7 @@ public fun NotebookCellGrid(
     cells: List<NotebookCell>,
     modifier: Modifier = Modifier,
     stampClock: StampClock? = null,
+    recolour: CellRecolour? = null,
 ) {
     val palette = LocalNotebookPalette.current
     Canvas(modifier = modifier) {
@@ -67,7 +78,7 @@ public fun NotebookCellGrid(
         if ((rows <= 0) || (cols <= 0)) return@Canvas
         val metrics = gridMetrics(size, rows, cols)
         val origin = Offset((size.width - metrics.width) / 2f, (size.height - metrics.height) / 2f)
-        drawCells(cells, metrics.cell, origin, palette, stampClock)
+        drawCells(cells, metrics.cell, origin, palette, stampClock, recolour)
         drawGridLines(metrics.cell, origin, palette.gridLine)
         drawPreviewOutlines(cells, metrics.cell, origin, palette.previewOutline)
     }
@@ -79,6 +90,7 @@ private fun DrawScope.drawCells(
     origin: Offset,
     palette: NotebookPalette,
     stampClock: StampClock?,
+    recolour: CellRecolour?,
 ) {
     val cellSize = Size(cellSide, cellSide)
     cells.forEachIndexed { index, notebookCell ->
@@ -91,16 +103,19 @@ private fun DrawScope.drawCells(
             }
 
             playTime >= CellStampMillis -> {
-                drawRect(color = mark.color, topLeft = topLeft, size = cellSize)
+                drawRect(color = filledColor(mark, index, recolour), topLeft = topLeft, size = cellSize)
             }
 
             else -> {
                 drawRect(color = palette.countryTint, topLeft = topLeft, size = cellSize)
-                drawStamp(mark.color, topLeft, cellSide, playTime)
+                drawStamp(filledColor(mark, index, recolour), topLeft, cellSide, playTime)
             }
         }
     }
 }
+
+private fun filledColor(mark: CellMark.Filled, cellIndex: Int, recolour: CellRecolour?): Color =
+    recolour?.colorOf(cellIndex, mark.color) ?: mark.color
 
 // The fill grows from the Cell's centre; at the overshoot it slightly passes the Cell's edge, like a pencil stroke.
 private fun DrawScope.drawStamp(color: Color, cellTopLeft: Offset, cellSide: Float, playTimeMillis: Long) {

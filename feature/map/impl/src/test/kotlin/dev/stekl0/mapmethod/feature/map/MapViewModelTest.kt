@@ -97,6 +97,7 @@ class MapViewModelTest {
                 skipItems(1)
                 viewModel.logPushUps(2)
                 expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0, 1)))
+                expectSideEffect(MapEvent.Completion)
                 expectInternalState {
                     copy(
                         cells =
@@ -122,7 +123,42 @@ class MapViewModelTest {
                 skipItems(1)
                 viewModel.logPushUps(5)
                 expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(1)))
+                expectSideEffect(MapEvent.Completion)
                 skipItems(1)
+                collecting.cancel()
+            }
+        }
+
+    @Test
+    fun `a Log that fills the last Cell emits Completion once, after its Cells`() =
+        runTest {
+            val viewModel = MapViewModel(FakeMapRepository(twoCells(true, false)))
+
+            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+                val collecting = runOnCreate()
+                skipItems(1)
+                viewModel.logPushUps(1)
+                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(1)))
+                expectSideEffect(MapEvent.Completion)
+                skipItems(1)
+                viewModel.logPushUps(1)
+                expectNoItems()
+                collecting.cancel()
+            }
+        }
+
+    @Test
+    fun `a Log that leaves Cells empty emits no Completion`() =
+        runTest {
+            val viewModel = MapViewModel(FakeMapRepository())
+
+            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+                val collecting = runOnCreate()
+                skipItems(1)
+                viewModel.logPushUps(1)
+                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0)))
+                skipItems(1)
+                expectNoItems()
                 collecting.cancel()
             }
         }
