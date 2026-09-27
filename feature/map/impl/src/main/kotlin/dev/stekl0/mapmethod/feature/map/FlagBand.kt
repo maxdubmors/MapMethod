@@ -1,12 +1,14 @@
 package dev.stekl0.mapmethod.feature.map
 
-/** Polish flag band by vertical position; derived from row at render time. */
+/** French flag band by horizontal position, west to east; derived from column at render time. */
 internal enum class FlagBand {
+    BLUE,
     WHITE,
     RED,
 }
 
-internal fun bandForRow(
-    row: Int,
-    rows: Int,
-): FlagBand = if (row < (rows / 2)) FlagBand.WHITE else FlagBand.RED
+/** The band of [col] among [cols] columns: three equal thirds, a remainder going to the western bands. */
+internal fun bandForCol(
+    col: Int,
+    cols: Int,
+): FlagBand = FlagBand.entries[(col * FlagBand.entries.size) / cols]

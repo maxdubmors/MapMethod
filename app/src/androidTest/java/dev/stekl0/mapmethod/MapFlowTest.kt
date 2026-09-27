@@ -111,6 +111,7 @@ class MapFlowTest {
     private fun assertMapInFlagColours() {
         compose.waitForIdle()
         val pixels = mapPixels().toSet()
+        assertTrue(palette().flagBlue.toArgb() in pixels)
         assertTrue(palette().flagWhite.toArgb() in pixels)
         assertTrue(palette().flagRed.toArgb() in pixels)
         assertFalse(palette().graphite.toArgb() in pixels)
@@ -235,6 +236,7 @@ class MapFlowTest {
 
         val pixels = mapPixels()
         assertTrue(pixels.count { it == palette().graphite.toArgb() } > graphiteBefore)
+        assertFalse(palette().flagBlue.toArgb() in pixels)
         assertFalse(palette().flagRed.toArgb() in pixels)
     }
 

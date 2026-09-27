@@ -11,7 +11,7 @@ import dev.stekl0.mapmethod.core.ui.NotebookCell
  */
 internal fun notebookCells(
     cells: List<CellUi>,
-    rows: Int,
+    cols: Int,
     preview: Set<Int>,
     isComplete: Boolean,
     palette: NotebookPalette,
@@ -19,7 +19,7 @@ internal fun notebookCells(
     cells.map { cell ->
         val mark =
             when {
-                cell.filled && isComplete -> CellMark.Filled(flagColor(bandForRow(cell.row, rows), palette))
+                cell.filled && isComplete -> CellMark.Filled(flagColor(bandForCol(cell.col, cols), palette))
                 cell.filled -> CellMark.Filled(palette.graphite)
                 cell.orderIndex in preview -> CellMark.Preview
                 else -> CellMark.Empty
@@ -33,6 +33,7 @@ internal fun confettiColors(palette: NotebookPalette): List<Color> =
 
 private fun flagColor(band: FlagBand, palette: NotebookPalette) =
     when (band) {
+        FlagBand.BLUE -> palette.flagBlue
         FlagBand.WHITE -> palette.flagWhite
         FlagBand.RED -> palette.flagRed
     }
