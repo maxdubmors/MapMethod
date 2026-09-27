@@ -1,5 +1,6 @@
 package dev.stekl0.mapmethod.core.ui
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -16,6 +17,17 @@ class GridMetricsTest {
     @Test
     fun `an empty grid has no geometry`() {
         assertEquals(GridMetrics(cell = 0f, width = 0f, height = 0f), gridMetrics(Size(100f, 200f), 0, 0))
+    }
+
+    @Test
+    fun `grid is centred in the canvas`() {
+        assertEquals(Offset(0f, 75f), gridMetrics(Size(100f, 200f), rows = 5, cols = 10).originIn(Size(100f, 200f)))
+    }
+
+    @Test
+    fun `a Cell lies at its row and column from the grid's corner`() {
+        val metrics = gridMetrics(Size(100f, 200f), rows = 5, cols = 10)
+        assertEquals(Offset(30f, 95f), metrics.cellTopLeft(Size(100f, 200f), row = 2, col = 3))
     }
 
     @Test

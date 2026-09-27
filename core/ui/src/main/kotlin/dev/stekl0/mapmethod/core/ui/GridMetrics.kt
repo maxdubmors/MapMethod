@@ -1,5 +1,6 @@
 package dev.stekl0.mapmethod.core.ui
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import kotlin.math.floor
 
@@ -15,6 +16,14 @@ public fun gridMetrics(viewport: Size, rows: Int, cols: Int): GridMetrics {
     val cell = minOf(viewport.width / cols, viewport.height / rows)
     return GridMetrics(cell = cell, width = cell * cols, height = cell * rows)
 }
+
+/** Top-left corner of the grid centred in a [viewport], where [NotebookCellGrid] draws it. */
+public fun GridMetrics.originIn(viewport: Size): Offset =
+    Offset((viewport.width - width) / 2f, (viewport.height - height) / 2f)
+
+/** Top-left corner of the Cell at [row] and [col] of the grid centred in a [viewport]. */
+public fun GridMetrics.cellTopLeft(viewport: Size, row: Int, col: Int): Offset =
+    originIn(viewport) + Offset(col * cell, row * cell)
 
 /**
  * Positions of the grid lines along one axis: aligned with the Cell edges that start at [origin],

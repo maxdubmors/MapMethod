@@ -77,7 +77,7 @@ public fun NotebookCellGrid(
         drawRect(color = palette.paper)
         if ((rows <= 0) || (cols <= 0)) return@Canvas
         val metrics = gridMetrics(size, rows, cols)
-        val origin = Offset((size.width - metrics.width) / 2f, (size.height - metrics.height) / 2f)
+        val origin = metrics.originIn(size)
         drawCells(cells, metrics.cell, origin, palette, stampClock, recolour)
         drawGridLines(metrics.cell, origin, palette.gridLine)
         drawPreviewOutlines(cells, metrics.cell, origin, palette.previewOutline)
