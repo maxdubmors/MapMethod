@@ -45,9 +45,11 @@ private val ContentSpacing = 12.dp
 private val StepperSpacing = 4.dp
 private val StepperButtonPadding = 8.dp
 private val CellGap = 1.dp
+
 // Non-const by design: const would trip standard:property-naming, PascalCase matches CellGap.
 @Suppress("MayBeConst")
 private val MinZoom = 1f
+
 @Suppress("MayBeConst")
 private val MaxZoom = 4f
 private val PolandWhite = Color.White

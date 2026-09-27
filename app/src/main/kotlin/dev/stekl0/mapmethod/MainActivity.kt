@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
-import dev.stekl0.mapmethod.ui.theme.MapMethodTheme
+import dev.stekl0.mapmethod.core.designsystem.theme.MapMethodTheme
 
 @AndroidEntryPoint
 public class MainActivity : ComponentActivity() {

@@ -33,6 +33,7 @@ rootProject.name = "mapmethod"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
 include(":core:database")
+include(":core:designsystem")
 include(":core:navigation")
 include(":feature:map:api")
 include(":feature:map:impl")
