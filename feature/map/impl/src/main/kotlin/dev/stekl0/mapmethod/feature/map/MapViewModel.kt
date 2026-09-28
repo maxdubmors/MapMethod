@@ -50,33 +50,7 @@ public class MapViewModel
         }
     }
 
-// The first filledCount Cells in fill order are filled.
-private fun MapWithProgress.toUiState(): MapUiState =
-    MapUiState(
-        cells =
-            cells.mapIndexed { position, cell ->
-                CellUi(
-                    orderIndex = cell.orderIndex,
-                    row = cell.row,
-                    col = cell.col,
-                    filled = position < filledCount,
-                    isNext = cell == nextCell,
-                )
-            },
-        filledCount = filledCount,
-        totalCount = totalCount,
-        isLoaded = true,
-        flag = definition.flag,
-    )
+private fun MapWithProgress.toUiState(): MapUiState = MapUiState(map = this, isLoaded = true)
 
 private fun MapDefinition.toOutlineUiState(): MapUiState =
-    MapUiState(
-        cells =
-            cells.map { cell ->
-                CellUi(orderIndex = cell.orderIndex, row = cell.row, col = cell.col, filled = false, isNext = false)
-            },
-        filledCount = 0,
-        totalCount = cells.size,
-        isLoaded = false,
-        flag = flag,
-    )
+    MapUiState(map = MapWithProgress(this, filledCount = 0), isLoaded = false)

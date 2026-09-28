@@ -11,6 +11,7 @@ dependencies {
     api(libs.androidx.compose.runtime)
     api(libs.androidx.compose.ui)
     api(libs.androidx.compose.ui.graphics)
-    implementation(project(":core:designsystem"))
+    api(project(":core:model"))
+    api(project(":core:designsystem"))
     implementation(libs.androidx.compose.foundation)
 }

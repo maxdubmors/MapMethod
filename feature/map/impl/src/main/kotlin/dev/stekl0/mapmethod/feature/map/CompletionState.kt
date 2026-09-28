@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import dev.stekl0.mapmethod.core.designsystem.motion.isReducedMotion
+import dev.stekl0.mapmethod.core.model.Cell
 import dev.stekl0.mapmethod.core.ui.CellRecolour
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -55,7 +56,7 @@ internal class CompletionState(
      * null when no wave plays.
      */
     @Composable
-    fun rememberCellRecolour(cells: List<CellUi>, graphite: Color): CellRecolour? {
+    fun rememberCellRecolour(cells: List<Cell>, graphite: Color): CellRecolour? {
         val wave = wave
         return remember(cells, wave, graphite) {
             if (wave == null) return@remember null

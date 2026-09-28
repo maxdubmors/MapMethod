@@ -90,30 +90,32 @@ class StartFlowTest {
     }
 
     @Test
-    fun showMapIsUsableWhileTheMotifAssembles() {
+    fun chooseMapIsUsableWhileTheMotifAssembles() {
         // Frames pass only when advanced by hand, so the Start assembly holds where it is.
         compose.mainClock.autoAdvance = false
         withAnimatorsOn {
             ActivityScenario.launch(MainActivity::class.java).use {
                 assertTrue("System animations are still off", animatorsEnabled())
-                tapShowMapWhileTheMotifAssembles()
+                tapChooseMapWhileTheMotifAssembles()
             }
         }
     }
 
-    private fun tapShowMapWhileTheMotifAssembles() {
-        advanceUntilShown("showMapButton", budgetMillis = NAVIGATION_BUDGET_MILLIS)
+    private fun tapChooseMapWhileTheMotifAssembles() {
+        advanceUntilShown("chooseMapButton", budgetMillis = NAVIGATION_BUDGET_MILLIS)
         val filledAtTap = motifFilledFraction()
         assertTrue("Motif already $filledAtTap filled at the tap", filledAtTap < 0.5f)
 
-        compose.onNodeWithTag("showMapButton").assertIsEnabled().performClick()
+        compose.onNodeWithTag("chooseMapButton").assertIsEnabled().performClick()
+        advanceUntilShown("atlasPreview", budgetMillis = NAVIGATION_BUDGET_MILLIS)
+        compose.onNodeWithTag("openMapButton").performClick()
         advanceUntilShown("mapCanvas", budgetMillis = NAVIGATION_BUDGET_MILLIS)
         compose.mainClock.autoAdvance = true
         compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
     }
 
     private companion object {
-        /** How soon Start must show its button, and a tap on it the Map. */
+        /** How soon Start must show its button, a tap on it the Atlas, and Open the Map. */
         const val NAVIGATION_BUDGET_MILLIS = 1_000L
 
         const val FRAME_MILLIS = 16L

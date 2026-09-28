@@ -1,10 +1,7 @@
 package dev.stekl0.mapmethod
 
-import android.app.Activity
-import android.app.Application
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.os.Bundle
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -19,7 +16,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
 import org.junit.Assert.assertEquals
@@ -27,8 +23,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import dev.stekl0.mapmethod.feature.map.R as MapR
 
 class MapFlowTest {
@@ -43,10 +37,15 @@ class MapFlowTest {
         return Progress(filled = match.groupValues[1].toInt(), total = match.groupValues[2].toInt())
     }
 
+    // Start leads to the Atlas, which opens France, its only Map.
     private fun goToMap() {
-        val showMapButton = compose.onNodeWithTag("showMapButton")
-        showMapButton.assertIsDisplayed()
-        showMapButton.performClick()
+        val chooseMapButton = compose.onNodeWithTag("chooseMapButton")
+        chooseMapButton.assertIsDisplayed()
+        chooseMapButton.performClick()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithTag("openMapButton").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("openMapButton").performClick()
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("mapCanvas").fetchSemanticsNodes().isNotEmpty()
         }
@@ -124,11 +123,11 @@ class MapFlowTest {
     fun startIsEntryWithGreeting() {
         compose.onNodeWithTag("startTitle").assertIsDisplayed()
         compose.onNodeWithTag("startSubtitle").assertIsDisplayed()
-        compose.onNodeWithTag("showMapButton").assertIsDisplayed()
+        compose.onNodeWithTag("chooseMapButton").assertIsDisplayed()
     }
 
     @Test
-    fun showMapNavigatesOneWayToMap() {
+    fun choosingAMapLeadsThroughTheAtlasToTheMap() {
         goToMap()
 
         compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
@@ -338,38 +337,5 @@ class MapFlowTest {
         compose.onNodeWithTag("mapCanvas").assertIsDisplayed()
         compose.onNodeWithTag("logButton").assertIsDisplayed()
         assertTrue(progress().total > 0)
-    }
-
-    @Test
-    fun rootBackLeavesApp() {
-        goToMap()
-
-        val destroyed = CountDownLatch(1)
-        val callbacks =
-            object : Application.ActivityLifecycleCallbacks {
-                override fun onActivityDestroyed(activity: Activity) {
-                    if (activity is MainActivity) destroyed.countDown()
-                }
-
-                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
-
-                override fun onActivityStarted(activity: Activity) = Unit
-
-                override fun onActivityResumed(activity: Activity) = Unit
-
-                override fun onActivityPaused(activity: Activity) = Unit
-
-                override fun onActivityStopped(activity: Activity) = Unit
-
-                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
-            }
-        compose.activity.application.registerActivityLifecycleCallbacks(callbacks)
-        val application = compose.activity.application
-        try {
-            Espresso.pressBackUnconditionally()
-            assertTrue(destroyed.await(10, TimeUnit.SECONDS))
-        } finally {
-            application.unregisterActivityLifecycleCallbacks(callbacks)
-        }
     }
 }

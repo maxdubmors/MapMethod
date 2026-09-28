@@ -23,14 +23,14 @@ class StartScreenScreenshotTest {
     @Test
     fun `Start with the motif assembled`() {
         composeRule.captureMultiTheme(name = "start", settleMillis = SettledMillis) {
-            StartScreen(title = "MapMethod", onShowMap = {})
+            StartScreen(title = "MapMethod", onChooseMap = {})
         }
     }
 
     @Test
     fun `Start on every window size`() {
         composeRule.captureMultiDevice(name = "start", settleMillis = SettledMillis) {
-            StartScreen(title = "MapMethod", onShowMap = {})
+            StartScreen(title = "MapMethod", onChooseMap = {})
         }
     }
 }

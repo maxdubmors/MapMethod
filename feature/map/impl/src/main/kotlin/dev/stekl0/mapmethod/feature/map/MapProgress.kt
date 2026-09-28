@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import dev.stekl0.mapmethod.core.ui.R as UiR
 
 private val ProgressSpacing = 8.dp
 
@@ -51,7 +52,7 @@ internal fun MapProgress(state: MapUiState, modifier: Modifier = Modifier) {
                     }
 
                     else -> {
-                        stringResource(R.string.feature_map_impl_progress, filled.roundToInt(), state.totalCount)
+                        stringResource(UiR.string.core_ui_map_progress, filled.roundToInt(), state.totalCount)
                     }
                 },
             style = MaterialTheme.typography.titleLarge,

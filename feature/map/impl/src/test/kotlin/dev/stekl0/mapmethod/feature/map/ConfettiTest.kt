@@ -3,6 +3,8 @@ package dev.stekl0.mapmethod.feature.map
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import dev.stekl0.mapmethod.core.model.Flag
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -17,6 +19,13 @@ private fun burst() = confettiBurst(bounds = Screen, colors = Colors, random = R
 private fun Confetti.positions() = pieces.map { Offset(it.x, it.y) }
 
 class ConfettiTest {
+    @Test
+    fun `confetti comes in the Map's flag colours only`() {
+        val flag = Flag(bands = Colors.map { it.toArgb() })
+
+        assertEquals(Colors, confettiColors(flag))
+    }
+
     @Test
     fun `a burst fires pieces in the given colours from inside the screen`() {
         val confetti = burst()

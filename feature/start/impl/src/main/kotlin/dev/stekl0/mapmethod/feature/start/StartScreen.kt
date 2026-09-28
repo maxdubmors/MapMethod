@@ -29,7 +29,7 @@ private val MotifSpacing = 32.dp
 @Composable
 public fun StartScreen(
     title: String,
-    onShowMap: () -> Unit,
+    onChooseMap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -71,13 +71,13 @@ public fun StartScreen(
                     .testTag("startSubtitle"),
         )
         Button(
-            onClick = onShowMap,
+            onClick = onChooseMap,
             modifier =
                 Modifier
                     .padding(top = ContentSpacing)
-                    .testTag("showMapButton"),
+                    .testTag("chooseMapButton"),
         ) {
-            Text(text = stringResource(R.string.feature_start_impl_show_map))
+            Text(text = stringResource(R.string.feature_start_impl_choose_map))
         }
     }
 }

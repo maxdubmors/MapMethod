@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -25,11 +27,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import dev.stekl0.mapmethod.core.designsystem.theme.LocalNotebookPalette
 import dev.stekl0.mapmethod.core.ui.NotebookCellGrid
 import dev.stekl0.mapmethod.core.ui.gridMetrics
+import dev.stekl0.mapmethod.core.ui.mapCells
 
 private val ScreenPadding = 16.dp
 private val ContentSpacing = 12.dp
@@ -47,6 +52,7 @@ internal fun MapScreen(
     cascade: LogCascadeState,
     completion: CompletionState,
     onLogCount: (Int) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val remaining = state.remaining
@@ -62,6 +68,7 @@ internal fun MapScreen(
             verticalArrangement = Arrangement.spacedBy(ContentSpacing),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            BackButton(onClick = onBack, modifier = Modifier.align(Alignment.Start))
             MapCanvas(
                 state = state,
                 cascade = cascade,
@@ -86,6 +93,18 @@ internal fun MapScreen(
     }
 }
 
+// The auto-mirrored arrow points against the reading direction; graphite, like the pencil on the sheet.
+@Composable
+private fun BackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    IconButton(onClick = onClick, modifier = modifier.testTag("backButton")) {
+        Icon(
+            painter = painterResource(R.drawable.feature_map_impl_ic_back),
+            contentDescription = stringResource(R.string.feature_map_impl_back),
+            tint = LocalNotebookPalette.current.graphite,
+        )
+    }
+}
+
 @Composable
 private fun MapCanvas(
     state: MapUiState,
@@ -103,15 +122,13 @@ private fun MapCanvas(
     val cols = remember(cells) { (cells.maxOfOrNull { it.col } ?: -1) + 1 }
     val palette = LocalNotebookPalette.current
     val notebookCells =
-        remember(cells, cols, previewCount, state.isLoaded, state.isComplete, state.flag, palette) {
-            notebookCells(
-                cells = cells,
-                cols = cols,
-                // No Cell is next until the progress is read.
-                preview = if (state.isLoaded) previewOrderIndexes(cells, previewCount) else emptySet(),
-                isComplete = state.isComplete,
-                flag = state.flag,
+        remember(state, previewCount, palette) {
+            mapCells(
+                map = state.map,
                 palette = palette,
+                // No Cell is next until the progress is read.
+                preview =
+                    if (state.isLoaded) previewOrderIndexes(cells, state.filledCount, previewCount) else emptySet(),
             )
         }
     val stampClock = cascade.rememberStampClock(cells)

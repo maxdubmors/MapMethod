@@ -16,6 +16,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import dev.stekl0.mapmethod.core.designsystem.motion.isReducedMotion
+import dev.stekl0.mapmethod.core.model.Cell
 import dev.stekl0.mapmethod.core.ui.CellStampMillis
 import dev.stekl0.mapmethod.core.ui.StampClock
 import kotlinx.coroutines.CoroutineScope
@@ -52,7 +53,7 @@ internal class LogCascadeState(
 
     /** Tells the grid, indexed like [cells], when each Cell stamps; null when no cascade plays. */
     @Composable
-    fun rememberStampClock(cells: List<CellUi>): StampClock? {
+    fun rememberStampClock(cells: List<Cell>): StampClock? {
         val schedule = schedule
         return remember(cells, schedule) {
             if (schedule.isEmpty()) return@remember null
@@ -98,7 +99,7 @@ internal class LogCascadeState(
     // The event can arrive before the Map's state shows the Cells filled; until then they wait hidden.
     private suspend fun awaitFilled(lastOrderIndex: Int) {
         snapshotFlow { mapState.value }.first { state ->
-            state.cells.any { it.orderIndex == lastOrderIndex && it.filled }
+            state.cells.take(state.filledCount).any { it.orderIndex == lastOrderIndex }
         }
     }
 
