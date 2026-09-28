@@ -50,8 +50,6 @@ class MapFlowTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("mapCanvas").fetchSemanticsNodes().isNotEmpty()
         }
-        // A fresh install seeds the Map off the main thread; wait for its Cells.
-        compose.waitUntil(timeoutMillis = 10_000) { (progressText() == completionText()) || (progress().total > 0) }
     }
 
     private fun waitForFilled(filled: Int) {

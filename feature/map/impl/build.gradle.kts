@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:database"))
+    implementation(project(":core:data"))
     implementation(project(":feature:map:api"))
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)

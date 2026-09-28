@@ -7,7 +7,3 @@ plugins {
 android {
     namespace = "dev.stekl0.mapmethod.core.database"
 }
-
-dependencies {
-    testImplementation(libs.kotlinx.coroutines.test)
-}
