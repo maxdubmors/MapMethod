@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import dev.stekl0.mapmethod.core.data.catalogue.FranceMapId
 import dev.stekl0.mapmethod.core.navigation.rememberNavigator
 import dev.stekl0.mapmethod.feature.map.api.MapNavKey
 import dev.stekl0.mapmethod.feature.map.mapEntry
@@ -16,7 +17,7 @@ import dev.stekl0.mapmethod.feature.start.api.StartNavKey
 import dev.stekl0.mapmethod.feature.start.startEntry
 
 /**
- * Start is the entry destination and navigates one-way to Map.
+ * Start is the entry destination and navigates one-way to the France Map.
  * Each entry owns its ViewModel through the entry decorators.
  */
 @Composable
@@ -27,7 +28,7 @@ public fun MapMethodApp(
     val title = stringResource(R.string.app_name)
     val entryProvider =
         entryProvider {
-            startEntry(title = title) { navigator.replace(MapNavKey) }
+            startEntry(title = title) { navigator.replace(MapNavKey(FranceMapId)) }
             mapEntry()
         }
 

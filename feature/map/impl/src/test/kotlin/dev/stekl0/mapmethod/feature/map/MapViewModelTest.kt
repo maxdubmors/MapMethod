@@ -6,9 +6,12 @@ import dev.stekl0.mapmethod.core.model.Flag
 import dev.stekl0.mapmethod.core.model.MapDefinition
 import dev.stekl0.mapmethod.core.model.MapId
 import dev.stekl0.mapmethod.core.model.MapWithProgress
+import dev.stekl0.mapmethod.feature.map.api.MapNavKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -22,34 +25,47 @@ private val TwoCells =
         flag = Flag(bands = listOf(0xFF000001.toInt(), 0xFF000002.toInt())),
     )
 
+private val OtherTwoCells =
+    TwoCells.copy(id = MapId("other"), flag = Flag(bands = listOf(0xFF000003.toInt(), 0xFF000004.toInt())))
+
 /**
- * Every identity observes one Map of [TwoCells] whose first [initialFilledCount] Cells are filled;
- * its progress is at hand without waiting once [loaded].
+ * Two Maps, [TwoCells] and [OtherTwoCells], whose first [initialFilledCount] and [otherFilledCount] Cells are
+ * filled; their progress is at hand without waiting once [loaded].
  */
 private class FakeMapRepository(
     initialFilledCount: Int = 0,
+    otherFilledCount: Int = 0,
     private val loaded: Boolean = false,
 ) : MapRepository {
-    private val filledCount = MutableStateFlow(initialFilledCount)
+    private val definitions = listOf(TwoCells, OtherTwoCells)
+    private val filledCounts =
+        MutableStateFlow(mapOf(TwoCells.id to initialFilledCount, OtherTwoCells.id to otherFilledCount))
 
-    override fun observeMaps(): Flow<List<MapWithProgress>> = filledCount.map { listOf(MapWithProgress(TwoCells, it)) }
+    private fun progress(id: MapId, counts: Map<MapId, Int>) = MapWithProgress(mapDefinition(id), counts.getValue(id))
 
-    override fun observeMap(id: MapId): Flow<MapWithProgress> = filledCount.map { MapWithProgress(TwoCells, it) }
+    override fun observeMaps(): Flow<List<MapWithProgress>> =
+        filledCounts.map { counts -> definitions.map { progress(it.id, counts) } }
 
-    override fun mapDefinition(id: MapId): MapDefinition = TwoCells
+    override fun observeMap(id: MapId): Flow<MapWithProgress> =
+        filledCounts.map { progress(id, it) }.distinctUntilChanged()
 
-    override fun loadedMap(id: MapId): MapWithProgress? =
-        if (loaded) MapWithProgress(TwoCells, filledCount.value) else null
+    override fun mapDefinition(id: MapId): MapDefinition = definitions.single { it.id == id }
+
+    override fun loadedMap(id: MapId): MapWithProgress? = if (loaded) progress(id, filledCounts.value) else null
 
     override suspend fun log(id: MapId, count: Int): List<Int> {
         if (count <= 0) return emptyList()
-        val before = filledCount.value
-        filledCount.value = (before + count).coerceAtMost(TwoCells.cells.size)
-        return (before until filledCount.value).toList()
+        val before = filledCounts.value.getValue(id)
+        val after = (before + count).coerceAtMost(mapDefinition(id).cells.size)
+        filledCounts.value += id to after
+        return (before until after).toList()
     }
 }
 
-private fun mapViewModel(repository: MapRepository = FakeMapRepository()) = MapViewModel(repository)
+private fun mapViewModel(
+    repository: MapRepository = FakeMapRepository(),
+    mapId: MapId = TwoCells.id,
+) = MapViewModel(MapNavKey(mapId), repository)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapViewModelTest {
@@ -253,6 +269,58 @@ class MapViewModelTest {
                 expectNoItems()
                 collecting.cancel()
             }
+        }
+
+    @Test
+    fun `the Map it was given opens as its outline and then shows its progress`() =
+        runTest {
+            val viewModel = mapViewModel(FakeMapRepository(otherFilledCount = 1), mapId = OtherTwoCells.id)
+
+            viewModel.testWithInternalState(this) {
+                assertEquals(OtherTwoCells.flag, viewModel.container.stateFlow.value.flag)
+                val collecting = runOnCreate()
+                expectInternalState {
+                    copy(
+                        cells =
+                            listOf(
+                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
+                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
+                            ),
+                        filledCount = 1,
+                        isLoaded = true,
+                    )
+                }
+                collecting.cancel()
+            }
+        }
+
+    @Test
+    fun `the Map it was given opens in its progress when that is at hand`() =
+        runTest {
+            val viewModel =
+                mapViewModel(FakeMapRepository(otherFilledCount = 2, loaded = true), mapId = OtherTwoCells.id)
+
+            val state = viewModel.container.stateFlow.value
+            assertEquals(2, state.filledCount)
+            assertEquals(OtherTwoCells.flag, state.flag)
+        }
+
+    @Test
+    fun `a Log fills the Map it was given and leaves another Map untouched`() =
+        runTest {
+            val repository = FakeMapRepository()
+            val viewModel = mapViewModel(repository, mapId = OtherTwoCells.id)
+
+            viewModel.testWithInternalState(this) {
+                val collecting = runOnCreate()
+                skipItems(1)
+                viewModel.logPushUps(1)
+                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0)))
+                skipItems(1)
+                collecting.cancel()
+            }
+            assertEquals(1, repository.observeMap(OtherTwoCells.id).first().filledCount)
+            assertEquals(0, repository.observeMap(TwoCells.id).first().filledCount)
         }
 
     @Test
