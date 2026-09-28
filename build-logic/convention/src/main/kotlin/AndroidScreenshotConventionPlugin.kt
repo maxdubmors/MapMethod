@@ -45,11 +45,6 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
                 "testRuntimeOnly"(libs.findLibrary("androidx.compose.ui.test.manifest").get())
                 "testImplementation"(libs.findLibrary("robolectric").get())
                 "testImplementation"(libs.findLibrary("roborazzi").get())
-                // As in instrumented tests, Compose UI tests pull in an Espresso too old for recent
-                // API levels (it calls the removed InputManager.getInstance), so raise it.
-                constraints {
-                    "testImplementation"(libs.findLibrary("androidx.espresso.core").get())
-                }
             }
         }
     }
