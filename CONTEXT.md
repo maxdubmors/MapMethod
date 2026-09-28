@@ -33,5 +33,9 @@ The moment the last Cell of a Map is filled: the pencil-grey Map turns into the 
 _Avoid_: finish, win, victory
 
 **Start**:
-The greeting entry screen that navigates one-way to Map.
+The greeting entry screen that navigates one-way to Atlas.
 _Avoid_: starting screen, welcome, home
+
+**Atlas**:
+The collection of Maps the user leafs through one at a time to choose which Map to open; each Map is shown as a preview of its real progress in pencil, or in its flag colours after Completion. Going back from a Map returns to Atlas.
+_Avoid_: menu, map picker, level select, gallery
