@@ -25,9 +25,12 @@ internal fun Project.configureAndroidCompose(
             "implementation"(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
             "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
             // Compose UI tests pull in an Espresso too old for recent API levels
-            // (it calls the removed InputManager.getInstance), so raise it.
+            // (it calls the removed InputManager.getInstance), so raise it,
+            // on a device and under Robolectric alike.
             constraints {
-                "androidTestImplementation"(libs.findLibrary("androidx-espresso-core").get())
+                val espresso = libs.findLibrary("androidx-espresso-core").get()
+                "androidTestImplementation"(espresso)
+                "testImplementation"(espresso)
             }
         }
     }
