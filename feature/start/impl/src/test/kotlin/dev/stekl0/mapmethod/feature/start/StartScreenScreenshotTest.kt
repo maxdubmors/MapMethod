@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// Past the last stamp, so the motif is assembled; the preview Cell's breath is still at its faintest.
+// Just past the last stamp: the motif is assembled and the preview Cell's breath has barely begun.
 private val SettledMillis = assemblySchedule(ItalyMotif.FILLED_COUNT).assemblyDurationMillis() + 100L
 
 @RunWith(RobolectricTestRunner::class)
@@ -23,18 +23,19 @@ class StartScreenScreenshotTest {
 
     @Test
     fun `Start with the motif assembled, light`() {
-        captureStart(darkTheme = false, name = "start_light")
+        captureStart(darkTheme = false)
     }
 
     @Test
     fun `Start with the motif assembled, dark`() {
-        captureStart(darkTheme = true, name = "start_dark")
+        captureStart(darkTheme = true)
     }
 
-    private fun captureStart(darkTheme: Boolean, name: String) {
+    private fun captureStart(darkTheme: Boolean) {
         composeRule.mainClock.autoAdvance = false
         composeRule.setContent {
-            // The notebook palette of the theme itself, not the colours of the device's wallpaper.
+            // Dynamic colour follows the device's wallpaper, so the capture pins the theme's own
+            // fallback scheme instead; the notebook palette is the same either way.
             MapMethodTheme(darkTheme = darkTheme, dynamicColor = false) {
                 Surface {
                     StartScreen(title = "MapMethod", onShowMap = {})
@@ -42,6 +43,6 @@ class StartScreenScreenshotTest {
             }
         }
         composeRule.mainClock.advanceTimeBy(SettledMillis)
-        composeRule.onRoot().captureRoboImage("$name.png")
+        composeRule.onRoot().captureRoboImage(if (darkTheme) "start_dark.png" else "start_light.png")
     }
 }

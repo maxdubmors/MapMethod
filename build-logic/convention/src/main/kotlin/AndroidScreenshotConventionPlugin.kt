@@ -8,28 +8,29 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 /**
- * Screenshot tests on the JVM: Robolectric renders with native graphics, Roborazzi records and
- * verifies the baselines kept in `src/test/screenshots`. Cf. NiA's Roborazzi setup.
+ * Screenshot tests of an Android library on the JVM: Robolectric renders with native graphics,
+ * Roborazzi records and verifies the baselines kept in `src/test/screenshots`.
  */
 class AndroidScreenshotConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            apply(plugin = "com.android.library")
             apply(plugin = "io.github.takahirom.roborazzi")
 
             extensions.configure<LibraryExtension> {
                 testOptions.unitTests.isIncludeAndroidResources = true
                 testOptions.unitTests.all {
                     it.systemProperty("robolectric.graphicsMode", "NATIVE")
+                    // A capture's file name is taken relative to the output directory below.
+                    it.systemProperty(
+                        "roborazzi.record.filePathStrategy",
+                        "relativePathFromRoborazziContextOutputDirectory",
+                    )
                     // Robolectric reaches into FileDescriptor through JDK internals and loads native
                     // graphics, both of which recent JDKs only allow when asked.
                     it.jvmArgs(
                         "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
                         "--enable-native-access=ALL-UNNAMED",
-                    )
-                    // A capture named "start_light.png" lands right in the output directory below.
-                    it.systemProperty(
-                        "roborazzi.record.filePathStrategy",
-                        "relativePathFromRoborazziContextOutputDirectory",
                     )
                 }
             }
@@ -39,7 +40,7 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                "testImplementation"(platform(libs.findLibrary("androidx-compose-bom").get()))
+                "testImplementation"(platform(libs.findLibrary("androidx.compose.bom").get()))
                 "testImplementation"(libs.findLibrary("androidx.compose.ui.test.junit4").get())
                 "testRuntimeOnly"(libs.findLibrary("androidx.compose.ui.test.manifest").get())
                 "testImplementation"(libs.findLibrary("robolectric").get())
@@ -47,7 +48,7 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
                 // As in instrumented tests, Compose UI tests pull in an Espresso too old for recent
                 // API levels (it calls the removed InputManager.getInstance), so raise it.
                 constraints {
-                    "testImplementation"(libs.findLibrary("androidx-espresso-core").get())
+                    "testImplementation"(libs.findLibrary("androidx.espresso.core").get())
                 }
             }
         }

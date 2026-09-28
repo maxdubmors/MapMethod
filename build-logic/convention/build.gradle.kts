@@ -26,8 +26,8 @@ dependencies {
     compileOnly(libs.kotlinter.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
-    compileOnly(libs.room.gradlePlugin)
     compileOnly(libs.roborazzi.gradlePlugin)
+    compileOnly(libs.room.gradlePlugin)
 }
 
 tasks {
