@@ -26,6 +26,7 @@ dependencies {
     compileOnly(libs.kotlinter.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
+    compileOnly(libs.roborazzi.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)
 }
 
@@ -69,6 +70,10 @@ gradlePlugin {
         register("androidRoom") {
             id = libs.plugins.mapmethod.android.room.get().pluginId
             implementationClass = "AndroidRoomConventionPlugin"
+        }
+        register("androidScreenshot") {
+            id = libs.plugins.mapmethod.android.screenshot.get().pluginId
+            implementationClass = "AndroidScreenshotConventionPlugin"
         }
         register("lint") {
             id = libs.plugins.mapmethod.lint.get().pluginId
