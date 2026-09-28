@@ -26,9 +26,9 @@ class MapRepositoryTest {
     private val database = InMemoryMapDatabase(ApplicationProvider.getApplicationContext())
 
     // A second Map beside France, to tell the progress of one identity from another's.
-    private val pair =
+    private val twoCellMap =
         MapDefinition(
-            id = MapId("pair"),
+            id = MapId("two-cells"),
             cells = listOf(Cell(orderIndex = 0, row = 0, col = 0), Cell(orderIndex = 1, row = 0, col = 1)),
         )
 
@@ -110,22 +110,22 @@ class MapRepositoryTest {
     @Test
     fun theProgressOfOneMapDoesNotAffectAnother() =
         runTest {
-            val repository = repository(MapCatalogue(MapCatalogue.Default.maps + pair))
+            val repository = repository(MapCatalogue(MapCatalogue.Default.maps + twoCellMap))
             repository.log(FranceMapId, 60)
 
-            assertEquals(MapWithProgress(pair, filledCount = 0), repository.observeMap(pair.id).first())
-            assertEquals(listOf(0, 1), repository.log(pair.id, 5))
+            assertEquals(MapWithProgress(twoCellMap, filledCount = 0), repository.observeMap(twoCellMap.id).first())
+            assertEquals(listOf(0, 1), repository.log(twoCellMap.id, 5))
             assertEquals(60, repository.observeMap(FranceMapId).first().filledCount)
         }
 
     @Test
     fun observingAllMapsListsTheCatalogueInOrderWithProgress() =
         runTest {
-            val repository = repository(MapCatalogue(listOf(pair) + MapCatalogue.Default.maps))
+            val repository = repository(MapCatalogue(listOf(twoCellMap) + MapCatalogue.Default.maps))
             repository.log(FranceMapId, 7)
 
             assertEquals(
-                listOf(MapWithProgress(pair, filledCount = 0), MapWithProgress(France, filledCount = 7)),
+                listOf(MapWithProgress(twoCellMap, filledCount = 0), MapWithProgress(France, filledCount = 7)),
                 repository.observeMaps().first(),
             )
         }

@@ -36,7 +36,7 @@ public class MapViewModel
         }
     }
 
-// The first filledCount Cells in fill order are filled, and the one after them is next.
+// The first filledCount Cells in fill order are filled.
 private fun MapWithProgress.toUiState(): MapUiState =
     MapUiState(
         cells =
@@ -46,7 +46,7 @@ private fun MapWithProgress.toUiState(): MapUiState =
                     row = cell.row,
                     col = cell.col,
                     filled = position < filledCount,
-                    isNext = position == filledCount,
+                    isNext = cell == nextCell,
                 )
             },
         filledCount = filledCount,

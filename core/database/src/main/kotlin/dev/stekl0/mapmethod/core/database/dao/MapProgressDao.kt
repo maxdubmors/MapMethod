@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 /** Map progress by Map identity; a Map without a row has nothing filled. */
 @Dao
-public interface MapProgressDao {
+public abstract class MapProgressDao {
     @Query("SELECT mapId, filledCount FROM map_progress")
-    public fun observeFilledCounts(): Flow<
+    public abstract fun observeFilledCounts(): Flow<
         Map<
             @MapColumn("mapId")
             String,
@@ -20,14 +20,16 @@ public interface MapProgressDao {
     >
 
     @Query("SELECT filledCount FROM map_progress WHERE mapId = :mapId")
-    public fun observeFilledCount(mapId: String): Flow<Int?>
+    public abstract fun observeFilledCount(mapId: String): Flow<Int?>
 
     /**
-     * A Log: adds [count] to the filled count of [mapId], clamped to its [cellCount], as one
-     * transaction that creates the row when it is missing.
+     * A Log: adds a positive [count] to the filled count of [mapId], clamped to its [cellCount], as one
+     * transaction that creates the row when it is missing. Not an UPSERT statement: minSdk 29 ships
+     * SQLite 3.22, and UPSERT arrived in 3.24.
      */
     @Transaction
-    public suspend fun addFilled(mapId: String, count: Int, cellCount: Int): FilledCountChange {
+    public open suspend fun addFilled(mapId: String, count: Int, cellCount: Int): FilledCountChange {
+        require(count > 0) { "A Log fills at least one Cell, not $count" }
         insertEmpty(mapId)
         val before = filledCount(mapId)
         raiseFilledCount(mapId = mapId, count = count, cellCount = cellCount)
@@ -35,15 +37,15 @@ public interface MapProgressDao {
     }
 
     @Query("INSERT OR IGNORE INTO map_progress (mapId, filledCount) VALUES (:mapId, 0)")
-    public suspend fun insertEmpty(mapId: String)
+    internal abstract suspend fun insertEmpty(mapId: String)
 
     @Query("SELECT filledCount FROM map_progress WHERE mapId = :mapId")
-    public suspend fun filledCount(mapId: String): Int
+    internal abstract suspend fun filledCount(mapId: String): Int
 
     @Query(
         "UPDATE map_progress SET filledCount = MIN(filledCount + :count, :cellCount) WHERE mapId = :mapId",
     )
-    public suspend fun raiseFilledCount(mapId: String, count: Int, cellCount: Int)
+    internal abstract suspend fun raiseFilledCount(mapId: String, count: Int, cellCount: Int)
 }
 
 /** A Map's filled count [before] and [after] a Log. */
