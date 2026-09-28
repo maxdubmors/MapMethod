@@ -1,5 +1,5 @@
 import androidx.room3.gradle.RoomExtension
-import dev.stekl0.mapmethod.libs
+import dev.maxdubmors.mapmethod.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply

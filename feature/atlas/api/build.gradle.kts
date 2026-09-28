@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.stekl0.mapmethod.feature.atlas.api"
+    namespace = "dev.maxdubmors.mapmethod.feature.atlas.api"
 }
 
 dependencies {

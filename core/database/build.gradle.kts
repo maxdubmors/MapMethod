@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.stekl0.mapmethod.core.database"
+    namespace = "dev.maxdubmors.mapmethod.core.database"
     testFixtures {
         enable = true
     }

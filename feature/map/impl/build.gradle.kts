@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.stekl0.mapmethod.feature.map"
+    namespace = "dev.maxdubmors.mapmethod.feature.map"
 }
 
 dependencies {
