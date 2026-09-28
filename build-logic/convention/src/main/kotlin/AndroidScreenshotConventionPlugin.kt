@@ -9,7 +9,8 @@ import org.gradle.kotlin.dsl.dependencies
 
 /**
  * Screenshot tests of an Android library on the JVM: Robolectric renders with native graphics,
- * Roborazzi records and verifies the baselines kept in `src/test/screenshots`.
+ * Roborazzi records and verifies the baselines kept in `src/test/screenshots`, and
+ * `:core:screenshot-testing` captures a screen in the app theme.
  */
 class AndroidScreenshotConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -40,11 +41,10 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
+                "testImplementation"(project(":core:screenshot-testing"))
                 "testImplementation"(platform(libs.findLibrary("androidx.compose.bom").get()))
-                "testImplementation"(libs.findLibrary("androidx.compose.ui.test.junit4").get())
                 "testRuntimeOnly"(libs.findLibrary("androidx.compose.ui.test.manifest").get())
                 "testImplementation"(libs.findLibrary("robolectric").get())
-                "testImplementation"(libs.findLibrary("roborazzi").get())
             }
         }
     }

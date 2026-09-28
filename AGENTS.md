@@ -17,6 +17,7 @@ Single-context: one `CONTEXT.md` plus `docs/adr/` at the repo root. See `docs/ag
 ## Screenshot tests
 
 Modules opt in with the `mapmethod.android.screenshot` plugin; baselines live in the module's `src/test/screenshots`, recorded on Linux and committed.
+A test renders the stateless screen from an explicit state through `captureMultiTheme` from `:core:screenshot-testing`, which the plugin puts on the test classpath: it captures `<name>_light.png` and `<name>_dark.png` in the app theme with the test clock held still.
 
 - `./gradlew recordRoborazziDebug` records the baselines after a deliberate visual change.
 - `./gradlew verifyRoborazziDebug` checks the screens against them; a failure leaves a diff in `build/outputs/roborazzi/*_compare.png`.
