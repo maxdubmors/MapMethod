@@ -93,9 +93,9 @@ class MapViewModelTest {
         }
 
     @Test
-    fun `a Map whose progress is not at hand yet opens as its outline until it loads`() =
+    fun `the Map it was given opens as its outline until its progress loads`() =
         runTest {
-            val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 1))
+            val viewModel = mapViewModel(FakeMapRepository(otherFilledCount = 1), mapId = OtherTwoCells.id)
 
             viewModel.testWithInternalState(this) {
                 assertEquals(
@@ -108,7 +108,7 @@ class MapViewModelTest {
                         filledCount = 0,
                         totalCount = 2,
                         isLoaded = false,
-                        flag = TwoCells.flag,
+                        flag = OtherTwoCells.flag,
                     ),
                     viewModel.container.stateFlow.value,
                 )
@@ -129,9 +129,10 @@ class MapViewModelTest {
         }
 
     @Test
-    fun `a Map whose progress is at hand opens in it without waiting`() =
+    fun `the Map it was given opens in its progress without waiting when that is at hand`() =
         runTest {
-            val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 1, loaded = true))
+            val viewModel =
+                mapViewModel(FakeMapRepository(otherFilledCount = 1, loaded = true), mapId = OtherTwoCells.id)
 
             viewModel.testWithInternalState(this) {
                 assertEquals(
@@ -144,7 +145,7 @@ class MapViewModelTest {
                         filledCount = 1,
                         totalCount = 2,
                         isLoaded = true,
-                        flag = TwoCells.flag,
+                        flag = OtherTwoCells.flag,
                     ),
                     viewModel.container.stateFlow.value,
                 )
@@ -269,40 +270,6 @@ class MapViewModelTest {
                 expectNoItems()
                 collecting.cancel()
             }
-        }
-
-    @Test
-    fun `the Map it was given opens as its outline and then shows its progress`() =
-        runTest {
-            val viewModel = mapViewModel(FakeMapRepository(otherFilledCount = 1), mapId = OtherTwoCells.id)
-
-            viewModel.testWithInternalState(this) {
-                assertEquals(OtherTwoCells.flag, viewModel.container.stateFlow.value.flag)
-                val collecting = runOnCreate()
-                expectInternalState {
-                    copy(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
-                            ),
-                        filledCount = 1,
-                        isLoaded = true,
-                    )
-                }
-                collecting.cancel()
-            }
-        }
-
-    @Test
-    fun `the Map it was given opens in its progress when that is at hand`() =
-        runTest {
-            val viewModel =
-                mapViewModel(FakeMapRepository(otherFilledCount = 2, loaded = true), mapId = OtherTwoCells.id)
-
-            val state = viewModel.container.stateFlow.value
-            assertEquals(2, state.filledCount)
-            assertEquals(OtherTwoCells.flag, state.flag)
         }
 
     @Test

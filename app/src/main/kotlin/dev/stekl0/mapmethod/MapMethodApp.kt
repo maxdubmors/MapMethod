@@ -17,7 +17,7 @@ import dev.stekl0.mapmethod.feature.start.api.StartNavKey
 import dev.stekl0.mapmethod.feature.start.startEntry
 
 /**
- * Start is the entry destination and navigates one-way to the France Map.
+ * Start is the entry destination and navigates one-way to Map; until the Atlas exists, it opens France.
  * Each entry owns its ViewModel through the entry decorators.
  */
 @Composable
