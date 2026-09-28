@@ -1,6 +1,7 @@
 package dev.stekl0.mapmethod.core.data.catalogue
 
 import dev.stekl0.mapmethod.core.model.Cell
+import dev.stekl0.mapmethod.core.model.Flag
 import dev.stekl0.mapmethod.core.model.MapId
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -40,6 +41,21 @@ class FranceTest {
         assertEquals(
             listOf(Cell(orderIndex = 98, row = 12, col = 6), Cell(orderIndex = 99, row = 12, col = 7)),
             cells.takeLast(2),
+        )
+    }
+
+    @Test
+    fun `France brings its blue, white and red, west to east`() {
+        assertEquals(Flag(bands = listOf(0xFF0055A4.toInt(), 0xFFFFFFFF.toInt(), 0xFFEF4135.toInt())), France.flag)
+    }
+
+    @Test
+    fun `France's fourteen columns split five blue, five white and four red`() {
+        val (blue, white, red) = France.flag.bands
+
+        assertEquals(
+            List(5) { blue } + List(5) { white } + List(4) { red },
+            (0 until 14).map { France.flag.colorAt(col = it, cols = 14) },
         )
     }
 

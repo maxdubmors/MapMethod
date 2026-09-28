@@ -2,6 +2,7 @@ package dev.stekl0.mapmethod.feature.map
 
 import dev.stekl0.mapmethod.core.data.repository.MapRepository
 import dev.stekl0.mapmethod.core.model.Cell
+import dev.stekl0.mapmethod.core.model.Flag
 import dev.stekl0.mapmethod.core.model.MapDefinition
 import dev.stekl0.mapmethod.core.model.MapId
 import dev.stekl0.mapmethod.core.model.MapWithProgress
@@ -18,6 +19,7 @@ private val TwoCells =
     MapDefinition(
         id = MapId("two"),
         cells = listOf(Cell(orderIndex = 0, row = 0, col = 0), Cell(orderIndex = 1, row = 0, col = 1)),
+        flag = Flag(bands = listOf(0xFF000001.toInt(), 0xFF000002.toInt())),
     )
 
 /**
@@ -90,6 +92,7 @@ class MapViewModelTest {
                         filledCount = 0,
                         totalCount = 2,
                         isLoaded = false,
+                        flag = TwoCells.flag,
                     ),
                     viewModel.container.stateFlow.value,
                 )
@@ -125,6 +128,7 @@ class MapViewModelTest {
                         filledCount = 1,
                         totalCount = 2,
                         isLoaded = true,
+                        flag = TwoCells.flag,
                     ),
                     viewModel.container.stateFlow.value,
                 )

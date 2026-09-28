@@ -1,5 +1,6 @@
 package dev.stekl0.mapmethod.feature.map
 
+import dev.stekl0.mapmethod.core.model.Flag
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
@@ -11,16 +12,18 @@ class MapUiStateTest {
             CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
         )
 
+    private val flag = Flag(bands = listOf(0xFF000000.toInt()))
+
     @Test
     fun `a loaded Map has its empty Cells left to Log`() {
-        val state = MapUiState(cells = twoCells, filledCount = 1, totalCount = 2, isLoaded = true)
+        val state = MapUiState(cells = twoCells, filledCount = 1, totalCount = 2, isLoaded = true, flag = flag)
 
         assertEquals(1, state.remaining)
     }
 
     @Test
     fun `a Map not loaded yet has nothing to Log and is not complete`() {
-        val state = MapUiState(cells = twoCells, filledCount = 0, totalCount = 2, isLoaded = false)
+        val state = MapUiState(cells = twoCells, filledCount = 0, totalCount = 2, isLoaded = false, flag = flag)
 
         assertEquals(0, state.remaining)
         assertFalse(state.isComplete)

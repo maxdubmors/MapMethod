@@ -1,5 +1,6 @@
 package dev.stekl0.mapmethod.core.data.catalogue
 
+import dev.stekl0.mapmethod.core.model.Flag
 import dev.stekl0.mapmethod.core.model.MapDefinition
 import dev.stekl0.mapmethod.core.model.MapId
 
@@ -28,4 +29,5 @@ internal val France: MapDefinition =
                 "....1111......",
                 "......11......",
             ),
+        flag = Flag(bands = listOf(0xFF0055A4.toInt(), 0xFFFFFFFF.toInt(), 0xFFEF4135.toInt())),
     )

@@ -57,6 +57,7 @@ private fun MapWithProgress.toUiState(): MapUiState =
         filledCount = filledCount,
         totalCount = totalCount,
         isLoaded = true,
+        flag = definition.flag,
     )
 
 private fun MapDefinition.toOutlineUiState(): MapUiState =
@@ -68,4 +69,5 @@ private fun MapDefinition.toOutlineUiState(): MapUiState =
         filledCount = 0,
         totalCount = cells.size,
         isLoaded = false,
+        flag = flag,
     )

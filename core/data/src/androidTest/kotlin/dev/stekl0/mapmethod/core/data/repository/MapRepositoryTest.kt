@@ -7,6 +7,7 @@ import dev.stekl0.mapmethod.core.data.catalogue.FranceMapId
 import dev.stekl0.mapmethod.core.data.catalogue.MapCatalogue
 import dev.stekl0.mapmethod.core.database.InMemoryMapDatabase
 import dev.stekl0.mapmethod.core.model.Cell
+import dev.stekl0.mapmethod.core.model.Flag
 import dev.stekl0.mapmethod.core.model.MapDefinition
 import dev.stekl0.mapmethod.core.model.MapId
 import dev.stekl0.mapmethod.core.model.MapWithProgress
@@ -30,6 +31,7 @@ class MapRepositoryTest {
         MapDefinition(
             id = MapId("two-cells"),
             cells = listOf(Cell(orderIndex = 0, row = 0, col = 0), Cell(orderIndex = 1, row = 0, col = 1)),
+            flag = Flag(bands = listOf(0xFF000000.toInt())),
         )
 
     private fun TestScope.repository(catalogue: MapCatalogue = MapCatalogue.Default): MapRepository =

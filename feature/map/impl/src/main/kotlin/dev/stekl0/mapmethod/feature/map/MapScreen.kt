@@ -103,13 +103,14 @@ private fun MapCanvas(
     val cols = remember(cells) { (cells.maxOfOrNull { it.col } ?: -1) + 1 }
     val palette = LocalNotebookPalette.current
     val notebookCells =
-        remember(cells, cols, previewCount, state.isLoaded, state.isComplete, palette) {
+        remember(cells, cols, previewCount, state.isLoaded, state.isComplete, state.flag, palette) {
             notebookCells(
                 cells = cells,
                 cols = cols,
                 // No Cell is next until the progress is read.
                 preview = if (state.isLoaded) previewOrderIndexes(cells, previewCount) else emptySet(),
                 isComplete = state.isComplete,
+                flag = state.flag,
                 palette = palette,
             )
         }

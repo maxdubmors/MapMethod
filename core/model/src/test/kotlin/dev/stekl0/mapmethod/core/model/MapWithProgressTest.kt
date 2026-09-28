@@ -16,6 +16,7 @@ class MapWithProgressTest {
                     Cell(orderIndex = 1, row = 1, col = 0),
                     Cell(orderIndex = 2, row = 1, col = 1),
                 ),
+            flag = Flag(bands = listOf(0xFF000000.toInt())),
         )
 
     @Test
