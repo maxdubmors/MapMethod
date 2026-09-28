@@ -14,6 +14,14 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Single-context: one `CONTEXT.md` plus `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+## Screenshot tests
+
+Modules opt in with the `mapmethod.android.screenshot` plugin; baselines live in the module's `src/test/screenshots`, recorded on Linux and committed.
+
+- `./gradlew recordRoborazziDebug` records the baselines after a deliberate visual change.
+- `./gradlew verifyRoborazziDebug` checks the screens against them; a failure leaves a diff in `build/outputs/roborazzi/*_compare.png`.
+- `./gradlew compareRoborazziDebug` writes those diffs without failing.
+
 <!-- echolot -->
 ## Performance work: echolot
 
