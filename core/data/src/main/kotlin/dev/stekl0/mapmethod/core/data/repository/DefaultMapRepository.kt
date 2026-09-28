@@ -34,6 +34,8 @@ internal class DefaultMapRepository
                 .map { counts -> catalogue.maps.map { it.withProgress(counts) } }
                 .distinctUntilChanged()
 
+        override fun mapDefinition(id: MapId): MapDefinition = catalogue[id]
+
         override fun observeMap(id: MapId): Flow<MapWithProgress> {
             val definition = catalogue[id]
             return mapProgressDao.observeFilledCount(id.value)

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.stekl0.mapmethod.core.data.catalogue.FranceMapId
 import dev.stekl0.mapmethod.core.data.repository.MapRepository
+import dev.stekl0.mapmethod.core.model.MapDefinition
 import dev.stekl0.mapmethod.core.model.MapWithProgress
 import org.orbitmvi.orbit.OrbitContainer
 import org.orbitmvi.orbit.OrbitContainerHost
@@ -19,9 +20,13 @@ public class MapViewModel
         // The Map destination names no Map yet, so it shows France.
         private val mapId = FranceMapId
 
-        // Progress is read from app start on, so the Map normally opens on it without waiting.
+        // Progress is read from app start on, so the Map normally opens on it without waiting;
+        // otherwise it opens as its outline until the progress is read.
         override val container: OrbitContainer<MapUiState, MapUiState, MapEvent> =
-            orbitContainer(initialState = repository.loadedMap(mapId)?.toUiState() ?: MapUiState.EMPTY) {
+            orbitContainer(
+                initialState =
+                    repository.loadedMap(mapId)?.toUiState() ?: repository.mapDefinition(mapId).toOutlineUiState(),
+            ) {
                 repository.observeMap(mapId).collect { map -> reduce { map.toUiState() } }
             }
 
@@ -51,4 +56,16 @@ private fun MapWithProgress.toUiState(): MapUiState =
             },
         filledCount = filledCount,
         totalCount = totalCount,
+        isLoaded = true,
+    )
+
+private fun MapDefinition.toOutlineUiState(): MapUiState =
+    MapUiState(
+        cells =
+            cells.map { cell ->
+                CellUi(orderIndex = cell.orderIndex, row = cell.row, col = cell.col, filled = false, isNext = false)
+            },
+        filledCount = 0,
+        totalCount = cells.size,
+        isLoaded = false,
     )

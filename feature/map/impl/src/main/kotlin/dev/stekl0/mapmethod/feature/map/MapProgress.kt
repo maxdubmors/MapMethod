@@ -40,10 +40,19 @@ internal fun MapProgress(state: MapUiState, modifier: Modifier = Modifier) {
         )
         Text(
             text =
-                if (state.isComplete) {
-                    stringResource(R.string.feature_map_impl_complete)
-                } else {
-                    stringResource(R.string.feature_map_impl_progress, filled.roundToInt(), state.totalCount)
+                when {
+                    // Blank, not "0", until the progress is read; the line keeps its height.
+                    !state.isLoaded -> {
+                        ""
+                    }
+
+                    state.isComplete -> {
+                        stringResource(R.string.feature_map_impl_complete)
+                    }
+
+                    else -> {
+                        stringResource(R.string.feature_map_impl_progress, filled.roundToInt(), state.totalCount)
+                    }
                 },
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,

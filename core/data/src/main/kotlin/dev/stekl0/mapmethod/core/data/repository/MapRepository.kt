@@ -1,5 +1,6 @@
 package dev.stekl0.mapmethod.core.data.repository
 
+import dev.stekl0.mapmethod.core.model.MapDefinition
 import dev.stekl0.mapmethod.core.model.MapId
 import dev.stekl0.mapmethod.core.model.MapWithProgress
 import kotlinx.coroutines.flow.Flow
@@ -8,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 public interface MapRepository {
     /** Every Map with its progress, in catalogue order. */
     public fun observeMaps(): Flow<List<MapWithProgress>>
+
+    /** The Map [id] as the catalogue defines it, at hand at once. */
+    public fun mapDefinition(id: MapId): MapDefinition
 
     /** The Map [id] with its progress. */
     public fun observeMap(id: MapId): Flow<MapWithProgress>

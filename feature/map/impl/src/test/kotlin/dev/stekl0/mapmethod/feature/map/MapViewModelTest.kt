@@ -34,6 +34,8 @@ private class FakeMapRepository(
 
     override fun observeMap(id: MapId): Flow<MapWithProgress> = filledCount.map { MapWithProgress(TwoCells, it) }
 
+    override fun mapDefinition(id: MapId): MapDefinition = TwoCells
+
     override fun loadedMap(id: MapId): MapWithProgress? =
         if (loaded) MapWithProgress(TwoCells, filledCount.value) else null
 
@@ -54,7 +56,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel()
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 expectInternalState {
                     copy(
@@ -65,6 +67,42 @@ class MapViewModelTest {
                             ),
                         filledCount = 0,
                         totalCount = 2,
+                        isLoaded = true,
+                    )
+                }
+                collecting.cancel()
+            }
+        }
+
+    @Test
+    fun `a Map whose progress is not at hand yet opens as its outline until it loads`() =
+        runTest {
+            val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 1))
+
+            viewModel.testWithInternalState(this) {
+                assertEquals(
+                    MapUiState(
+                        cells =
+                            listOf(
+                                CellUi(orderIndex = 0, row = 0, col = 0, filled = false, isNext = false),
+                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = false),
+                            ),
+                        filledCount = 0,
+                        totalCount = 2,
+                        isLoaded = false,
+                    ),
+                    viewModel.container.stateFlow.value,
+                )
+                val collecting = runOnCreate()
+                expectInternalState {
+                    copy(
+                        cells =
+                            listOf(
+                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
+                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
+                            ),
+                        filledCount = 1,
+                        isLoaded = true,
                     )
                 }
                 collecting.cancel()
@@ -86,6 +124,7 @@ class MapViewModelTest {
                             ),
                         filledCount = 1,
                         totalCount = 2,
+                        isLoaded = true,
                     ),
                     viewModel.container.stateFlow.value,
                 )
@@ -100,7 +139,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel()
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
@@ -114,6 +153,7 @@ class MapViewModelTest {
                             ),
                         filledCount = 1,
                         totalCount = 2,
+                        isLoaded = true,
                     )
                 }
                 collecting.cancel()
@@ -125,7 +165,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel()
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(2)
@@ -140,6 +180,7 @@ class MapViewModelTest {
                             ),
                         filledCount = 2,
                         totalCount = 2,
+                        isLoaded = true,
                     )
                 }
                 collecting.cancel()
@@ -151,7 +192,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 1))
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(5)
@@ -167,7 +208,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 1))
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
@@ -185,7 +226,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel()
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
@@ -201,7 +242,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 2))
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
@@ -223,7 +264,7 @@ class MapViewModelTest {
         runTest {
             val viewModel = mapViewModel(FakeMapRepository(filledCount))
 
-            viewModel.testWithInternalState(this, MapUiState.EMPTY) {
+            viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
                 skipItems(1)
                 expectNoItems()

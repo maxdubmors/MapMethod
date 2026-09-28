@@ -6,4 +6,11 @@ plugins {
 
 android {
     namespace = "dev.stekl0.mapmethod.core.database"
+    testFixtures {
+        enable = true
+    }
+}
+
+dependencies {
+    testFixturesImplementation(libs.room.runtime)
 }
