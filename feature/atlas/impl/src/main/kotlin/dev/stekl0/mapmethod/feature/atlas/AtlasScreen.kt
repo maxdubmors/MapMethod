@@ -50,7 +50,8 @@ private val ChevronWidth = 48.dp
 private val PagerMaxWidth = PreviewMaxWidth + ChevronWidth * 2
 
 // A chevron with no Map beyond it: the graphite faded, like a line half rubbed out.
-private const val DimmedAlpha = 0.38f
+@Suppress("MayBeConst")
+private val DimmedAlpha = 0.38f
 
 /**
  * The Atlas, one Map at a time: the country's name, a preview of its Map flanked by chevrons, how
