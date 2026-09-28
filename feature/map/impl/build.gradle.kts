@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.mapmethod.android.feature.impl)
     alias(libs.plugins.mapmethod.android.library.compose)
+    alias(libs.plugins.mapmethod.android.screenshot)
 }
 
 android {
