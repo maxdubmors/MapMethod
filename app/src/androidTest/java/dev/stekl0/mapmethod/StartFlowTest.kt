@@ -1,7 +1,6 @@
 package dev.stekl0.mapmethod
 
 import android.animation.ValueAnimator
-import android.content.res.Configuration
 import android.os.ParcelFileDescriptor
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -14,7 +13,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
-import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
 import dev.stekl0.mapmethod.feature.start.ItalyMotif
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -25,24 +23,16 @@ class StartFlowTest {
     @get:Rule
     val compose = createEmptyComposeRule()
 
-    // The Start sheet is drawn in the notebook palette of the system theme the app follows.
-    private fun palette(): NotebookPalette {
-        val configuration = InstrumentationRegistry.getInstrumentation().targetContext.resources.configuration
-        val nightMode = configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return if (nightMode == Configuration.UI_MODE_NIGHT_YES) NotebookPalette.Dark else NotebookPalette.Light
-    }
-
     // Graphite on the Start sheet against the finished motif's filled Cells, drawn one Cell of paper in from its edge.
     private fun motifFilledFraction(): Float {
         val bitmap = compose.onNodeWithTag("startMotif").captureToImage().asAndroidBitmap()
-        val pixels = IntArray(bitmap.width * bitmap.height)
-        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        val pixels = bitmap.argbPixels()
         val cell =
             minOf(
                 bitmap.width.toFloat() / (ItalyMotif.rows.first().length + 2),
                 bitmap.height.toFloat() / (ItalyMotif.rows.size + 2),
             )
-        val graphite = pixels.count { it == palette().graphite.toArgb() }
+        val graphite = pixels.count { it == systemNotebookPalette().graphite.toArgb() }
         return graphite / (ItalyMotif.FILLED_COUNT * cell * cell)
     }
 

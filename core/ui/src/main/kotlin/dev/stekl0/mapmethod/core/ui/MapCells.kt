@@ -14,14 +14,12 @@ public fun mapCells(
     palette: NotebookPalette,
     preview: Set<Int> = emptySet(),
 ): List<NotebookCell> {
-    val cells = map.cells
-    val cols = (cells.maxOfOrNull { it.col } ?: -1) + 1
-    val flag = map.definition.flag
-    return cells.mapIndexed { position, cell ->
+    val definition = map.definition
+    return definition.cells.mapIndexed { position, cell ->
         val filled = position < map.filledCount
         val mark =
             when {
-                filled && map.isComplete -> CellMark.Filled(Color(flag.colorAt(cell.col, cols)))
+                filled && map.isComplete -> CellMark.Filled(Color(definition.flag.colorAt(cell.col, definition.cols)))
                 filled -> CellMark.Filled(palette.graphite)
                 cell.orderIndex in preview -> CellMark.Preview
                 else -> CellMark.Empty

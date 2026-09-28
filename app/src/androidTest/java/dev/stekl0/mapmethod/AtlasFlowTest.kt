@@ -5,11 +5,8 @@ import android.app.Application
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,9 +16,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
-import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
+import dev.stekl0.mapmethod.core.data.catalogue.France
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +31,8 @@ import dev.stekl0.mapmethod.feature.map.R as MapR
 class AtlasFlowTest {
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
+
+    private val franceCells = France.cells.size
 
     private fun targetContext() = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -67,22 +65,11 @@ class AtlasFlowTest {
 
     private fun waitForAtlasProgress(filled: Int) {
         waitForTag("atlasProgress")
-        val expected = string(UiR.string.core_ui_map_progress, filled, FRANCE_CELLS)
+        val expected = string(UiR.string.core_ui_map_progress, filled, franceCells)
         compose.waitUntil(timeoutMillis = 10_000) { textOf("atlasProgress") == expected }
     }
 
-    // The Map is drawn in the notebook palette of the system theme the app follows.
-    private fun palette(): NotebookPalette {
-        val nightMode = targetContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return if (nightMode == Configuration.UI_MODE_NIGHT_YES) NotebookPalette.Dark else NotebookPalette.Light
-    }
-
-    private fun previewPixels(): Set<Int> {
-        val bitmap = compose.onNodeWithTag("atlasPreview").captureToImage().asAndroidBitmap()
-        val pixels = IntArray(bitmap.width * bitmap.height)
-        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-        return pixels.toSet()
-    }
+    private fun previewPixels(): IntArray = compose.onNodeWithTag("atlasPreview").capturePixels()
 
     @Test
     fun choosingAMapShowsFranceInTheAtlasWithNothingFilled() {
@@ -122,17 +109,13 @@ class AtlasFlowTest {
     fun completingTheMapAndReturningShowsThePreviewInFlagColours() {
         goToAtlas()
         openMap()
-        logOnMap(FRANCE_CELLS)
+        logOnMap(franceCells)
 
         compose.onNodeWithTag("backButton").performClick()
-        waitForAtlasProgress(filled = FRANCE_CELLS)
+        waitForAtlasProgress(filled = franceCells)
         compose.waitForIdle()
 
-        val pixels = previewPixels()
-        assertTrue(franceBlue in pixels)
-        assertTrue(franceWhite in pixels)
-        assertTrue(franceRed in pixels)
-        assertFalse(palette().graphite.toArgb() in pixels)
+        assertFranceInFlagColours(previewPixels())
         // Open works on a complete Map too, to look at the finished flag.
         openMap()
     }
@@ -146,10 +129,7 @@ class AtlasFlowTest {
         waitForAtlasProgress(filled = 5)
         compose.waitForIdle()
 
-        val pixels = previewPixels()
-        assertTrue(palette().graphite.toArgb() in pixels)
-        assertFalse(franceBlue in pixels)
-        assertFalse(franceRed in pixels)
+        assertFranceInPencil(previewPixels())
     }
 
     @Test
@@ -173,7 +153,7 @@ class AtlasFlowTest {
         val france = string(UiR.string.core_ui_map_name_france)
 
         compose.onNodeWithContentDescription(
-            string(AtlasR.string.feature_atlas_impl_preview_description, france, 0, FRANCE_CELLS),
+            string(AtlasR.string.feature_atlas_impl_preview_description, france, 0, franceCells),
         ).assertIsDisplayed()
         compose.onNodeWithText(string(AtlasR.string.feature_atlas_impl_open)).assertIsDisplayed()
 
@@ -212,15 +192,5 @@ class AtlasFlowTest {
         } finally {
             application.unregisterActivityLifecycleCallbacks(callbacks)
         }
-    }
-
-    private companion object {
-        /** Mainland France in the catalogue. */
-        const val FRANCE_CELLS = 100
-
-        // France's own blue, white and red, whatever the theme.
-        val franceBlue = 0xFF0055A4.toInt()
-        val franceWhite = 0xFFFFFFFF.toInt()
-        val franceRed = 0xFFEF4135.toInt()
     }
 }

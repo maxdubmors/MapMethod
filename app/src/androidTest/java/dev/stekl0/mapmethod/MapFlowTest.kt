@@ -17,7 +17,6 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
-import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -92,31 +91,13 @@ class MapFlowTest {
 
     private fun targetContext() = InstrumentationRegistry.getInstrumentation().targetContext
 
-    // The Map is drawn in the notebook palette of the system theme the app follows.
-    private fun palette(): NotebookPalette {
-        val nightMode = targetContext().resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return if (nightMode == Configuration.UI_MODE_NIGHT_YES) NotebookPalette.Dark else NotebookPalette.Light
-    }
+    private fun graphite(): Int = systemNotebookPalette().graphite.toArgb()
 
-    // France's own blue, white and red, whatever the theme.
-    private val franceBlue = 0xFF0055A4.toInt()
-    private val franceWhite = 0xFFFFFFFF.toInt()
-    private val franceRed = 0xFFEF4135.toInt()
-
-    private fun mapPixels(): IntArray {
-        val bitmap = compose.onNodeWithTag("mapCanvas").captureToImage().asAndroidBitmap()
-        val pixels = IntArray(bitmap.width * bitmap.height)
-        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-        return pixels
-    }
+    private fun mapPixels(): IntArray = compose.onNodeWithTag("mapCanvas").capturePixels()
 
     private fun assertMapInFlagColours() {
         compose.waitForIdle()
-        val pixels = mapPixels().toSet()
-        assertTrue(franceBlue in pixels)
-        assertTrue(franceWhite in pixels)
-        assertTrue(franceRed in pixels)
-        assertFalse(palette().graphite.toArgb() in pixels)
+        assertFranceInFlagColours(mapPixels())
     }
 
     @Test
@@ -230,16 +211,15 @@ class MapFlowTest {
         goToMap()
         compose.onNodeWithTag("logField").performTextReplacement("5")
         compose.waitForIdle()
-        val graphiteBefore = mapPixels().count { it == palette().graphite.toArgb() }
+        val graphiteBefore = mapPixels().count { it == graphite() }
 
         compose.onNodeWithTag("logButton").performClick()
         waitForFilled(5)
         compose.waitForIdle()
 
         val pixels = mapPixels()
-        assertTrue(pixels.count { it == palette().graphite.toArgb() } > graphiteBefore)
-        assertFalse(franceBlue in pixels)
-        assertFalse(franceRed in pixels)
+        assertTrue(pixels.count { it == graphite() } > graphiteBefore)
+        assertFranceInPencil(pixels)
     }
 
     @Test

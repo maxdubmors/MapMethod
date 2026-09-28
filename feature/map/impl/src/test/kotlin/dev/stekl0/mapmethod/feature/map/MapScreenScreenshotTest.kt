@@ -4,10 +4,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
-import dev.stekl0.mapmethod.core.screenshottesting.ScreenshotFrance
+import dev.stekl0.mapmethod.core.data.catalogue.France
+import dev.stekl0.mapmethod.core.model.MapWithProgress
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiDevice
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiTheme
-import dev.stekl0.mapmethod.core.screenshottesting.screenshotFrance
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,7 +15,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /** France with its first [filledCount] Cells in fill order filled. */
-private fun franceMap(filledCount: Int): MapUiState = MapUiState(map = screenshotFrance(filledCount), isLoaded = true)
+private fun franceMap(filledCount: Int): MapUiState =
+    MapUiState(map = MapWithProgress(France, filledCount), isLoaded = true)
 
 @Composable
 private fun MapScreenOf(state: MapUiState) {
@@ -50,7 +51,7 @@ class MapScreenScreenshotTest {
 
     @Test
     fun `complete Map in the flag colours`() {
-        captureMap(name = "map_complete", state = franceMap(filledCount = ScreenshotFrance.cells.size))
+        captureMap(name = "map_complete", state = franceMap(filledCount = France.cells.size))
     }
 
     @Test

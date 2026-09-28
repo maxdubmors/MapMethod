@@ -10,7 +10,7 @@ public val FranceMapId: MapId = MapId("france")
  * Mainland France (no Corsica) as the method's paper sheet draws it: 100 Cells cropped to their own bounds,
  * 14 columns (west to east) by 13 rows (north to south).
  */
-internal val France: MapDefinition =
+public val France: MapDefinition =
     maskDefinition(
         id = FranceMapId,
         mask =

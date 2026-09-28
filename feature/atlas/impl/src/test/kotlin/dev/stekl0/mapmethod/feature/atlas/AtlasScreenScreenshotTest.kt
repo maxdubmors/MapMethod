@@ -3,17 +3,18 @@ package dev.stekl0.mapmethod.feature.atlas
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
-import dev.stekl0.mapmethod.core.screenshottesting.ScreenshotFrance
+import dev.stekl0.mapmethod.core.data.catalogue.France
+import dev.stekl0.mapmethod.core.model.MapWithProgress
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiDevice
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiTheme
-import dev.stekl0.mapmethod.core.screenshottesting.screenshotFrance
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-private fun franceAtlas(filledCount: Int) = AtlasUiState(pages = listOf(AtlasPage(screenshotFrance(filledCount))))
+private fun franceAtlas(filledCount: Int) =
+    AtlasUiState(pages = listOf(AtlasPage(MapWithProgress(France, filledCount))))
 
 /** The Atlas is static: the preview never animates, so the capture needs no clock. */
 @RunWith(RobolectricTestRunner::class)
@@ -34,7 +35,7 @@ class AtlasScreenScreenshotTest {
 
     @Test
     fun `complete France in the flag colours`() {
-        captureAtlas(name = "atlas_complete", state = franceAtlas(filledCount = ScreenshotFrance.cells.size))
+        captureAtlas(name = "atlas_complete", state = franceAtlas(filledCount = France.cells.size))
     }
 
     @Test

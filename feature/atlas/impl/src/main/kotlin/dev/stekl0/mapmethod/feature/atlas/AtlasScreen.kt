@@ -95,13 +95,11 @@ private fun AtlasPreview(
 ) {
     val palette = LocalNotebookPalette.current
     val cells = remember(page.map, palette) { mapCells(page.map, palette) }
-    val rows = remember(page.map) { (page.map.cells.maxOfOrNull { it.row } ?: -1) + 1 }
-    val cols = remember(page.map) { (page.map.cells.maxOfOrNull { it.col } ?: -1) + 1 }
     val description =
         stringResource(R.string.feature_atlas_impl_preview_description, name, page.filledCount, page.totalCount)
     NotebookCellGrid(
-        rows = rows,
-        cols = cols,
+        rows = page.map.definition.rows,
+        cols = page.map.definition.cols,
         cells = cells,
         modifier = modifier.semantics { contentDescription = description },
     )

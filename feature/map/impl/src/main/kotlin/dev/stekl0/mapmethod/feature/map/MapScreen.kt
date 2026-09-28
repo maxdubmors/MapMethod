@@ -118,8 +118,8 @@ private fun MapCanvas(
     var offsetY by rememberSaveable { mutableFloatStateOf(0f) }
     var viewport by remember { mutableStateOf(Size.Zero) }
     val cells = state.cells
-    val rows = remember(cells) { (cells.maxOfOrNull { it.row } ?: -1) + 1 }
-    val cols = remember(cells) { (cells.maxOfOrNull { it.col } ?: -1) + 1 }
+    val rows = state.map.definition.rows
+    val cols = state.map.definition.cols
     val palette = LocalNotebookPalette.current
     val notebookCells =
         remember(state, previewCount, palette) {
