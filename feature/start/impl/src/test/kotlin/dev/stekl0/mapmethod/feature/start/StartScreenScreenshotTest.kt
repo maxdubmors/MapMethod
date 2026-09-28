@@ -1,6 +1,7 @@
 package dev.stekl0.mapmethod.feature.start
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiTheme
 import org.junit.Rule
@@ -16,7 +17,7 @@ private val SettledMillis = assemblySchedule(ItalyMotif.FILLED_COUNT).assemblyDu
 @Config(qualifiers = RobolectricDeviceQualifiers.MediumPhone)
 class StartScreenScreenshotTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun `Start with the motif assembled`() {

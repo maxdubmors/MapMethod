@@ -1,7 +1,10 @@
 package dev.stekl0.mapmethod.feature.map
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import dev.stekl0.mapmethod.core.screenshottesting.captureMultiDevice
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiTheme
 import org.junit.Rule
 import org.junit.Test
@@ -48,6 +51,16 @@ private fun franceMap(filledCount: Int): MapUiState {
     return MapUiState(cells = cells, filledCount = filledCount, totalCount = cells.size)
 }
 
+@Composable
+private fun MapScreenOf(state: MapUiState) {
+    MapScreen(
+        state = state,
+        cascade = rememberLogCascadeState(state),
+        completion = rememberCompletionState(state),
+        onLogCount = {},
+    )
+}
+
 /**
  * The Map as its state alone draws it: no Log cascade or Completion plays, so every Cell is
  * settled and the capture needs no clock.
@@ -56,7 +69,7 @@ private fun franceMap(filledCount: Int): MapUiState {
 @Config(qualifiers = RobolectricDeviceQualifiers.MediumPhone)
 class MapScreenScreenshotTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun `empty Map with the next Cell previewed`() {
@@ -73,14 +86,13 @@ class MapScreenScreenshotTest {
         captureMap(name = "map_complete", state = franceMap(filledCount = FranceCellCount))
     }
 
+    @Test
+    fun `partly filled Map on every window size`() {
+        val state = franceMap(filledCount = 40)
+        composeRule.captureMultiDevice(name = "map_partly_filled") { MapScreenOf(state) }
+    }
+
     private fun captureMap(name: String, state: MapUiState) {
-        composeRule.captureMultiTheme(name = name) {
-            MapScreen(
-                state = state,
-                cascade = rememberLogCascadeState(state),
-                completion = rememberCompletionState(state),
-                onLogCount = {},
-            )
-        }
+        composeRule.captureMultiTheme(name = name) { MapScreenOf(state) }
     }
 }
