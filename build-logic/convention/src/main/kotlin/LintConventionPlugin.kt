@@ -15,18 +15,18 @@ class LintConventionPlugin : Plugin<Project> {
             apply(plugin = "org.jmailen.kotlinter")
             apply(plugin = "dev.detekt")
 
-            pluginManager.withPlugin("com.android.base") {
-                @Suppress("UnstableApiUsage")
-                val detektConfig = isolated.rootProject.projectDirectory.file("config/detekt/detekt.yml")
-                configure<DetektExtension> {
-                    config.setFrom(detektConfig)
-                    buildUponDefaultConfig.set(true)
-                }
+            // Detekt reads the shared config in every module, JVM ones included, and that config
+            // configures the Compose rules, so every module loads them.
+            @Suppress("UnstableApiUsage")
+            val detektConfig = isolated.rootProject.projectDirectory.file("config/detekt/detekt.yml")
+            configure<DetektExtension> {
+                config.setFrom(detektConfig)
+                buildUponDefaultConfig.set(true)
+            }
 
-                dependencies {
-                    add("detektPlugins", libs.findLibrary("compose-rules-detekt").get())
-                    add("ktlint", libs.findLibrary("compose-rules-ktlint").get())
-                }
+            dependencies {
+                add("detektPlugins", libs.findLibrary("compose-rules-detekt").get())
+                add("ktlint", libs.findLibrary("compose-rules-ktlint").get())
             }
 
             pluginManager.withPlugin("com.android.application") {

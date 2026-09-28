@@ -4,12 +4,18 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.StrictMode
 import dagger.hilt.android.HiltAndroidApp
+import dev.stekl0.mapmethod.core.data.repository.MapRepository
+import javax.inject.Inject
 
 /**
  * [Application] class for Map Method
  */
 @HiltAndroidApp
 public class MapMethodApplication : Application() {
+    // Injected at start, so Map progress is read while Start shows and the Map opens on it at once.
+    @Inject
+    internal lateinit var mapRepository: MapRepository
+
     override fun onCreate() {
         super.onCreate()
 

@@ -50,8 +50,6 @@ class MapFlowTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("mapCanvas").fetchSemanticsNodes().isNotEmpty()
         }
-        // A fresh install seeds the Map off the main thread; wait for its Cells.
-        compose.waitUntil(timeoutMillis = 10_000) { (progressText() == completionText()) || (progress().total > 0) }
     }
 
     private fun waitForFilled(filled: Int) {
@@ -101,6 +99,11 @@ class MapFlowTest {
         return if (nightMode == Configuration.UI_MODE_NIGHT_YES) NotebookPalette.Dark else NotebookPalette.Light
     }
 
+    // France's own blue, white and red, whatever the theme.
+    private val franceBlue = 0xFF0055A4.toInt()
+    private val franceWhite = 0xFFFFFFFF.toInt()
+    private val franceRed = 0xFFEF4135.toInt()
+
     private fun mapPixels(): IntArray {
         val bitmap = compose.onNodeWithTag("mapCanvas").captureToImage().asAndroidBitmap()
         val pixels = IntArray(bitmap.width * bitmap.height)
@@ -111,9 +114,9 @@ class MapFlowTest {
     private fun assertMapInFlagColours() {
         compose.waitForIdle()
         val pixels = mapPixels().toSet()
-        assertTrue(palette().flagBlue.toArgb() in pixels)
-        assertTrue(palette().flagWhite.toArgb() in pixels)
-        assertTrue(palette().flagRed.toArgb() in pixels)
+        assertTrue(franceBlue in pixels)
+        assertTrue(franceWhite in pixels)
+        assertTrue(franceRed in pixels)
         assertFalse(palette().graphite.toArgb() in pixels)
     }
 
@@ -236,8 +239,8 @@ class MapFlowTest {
 
         val pixels = mapPixels()
         assertTrue(pixels.count { it == palette().graphite.toArgb() } > graphiteBefore)
-        assertFalse(palette().flagBlue.toArgb() in pixels)
-        assertFalse(palette().flagRed.toArgb() in pixels)
+        assertFalse(franceBlue in pixels)
+        assertFalse(franceRed in pixels)
     }
 
     @Test

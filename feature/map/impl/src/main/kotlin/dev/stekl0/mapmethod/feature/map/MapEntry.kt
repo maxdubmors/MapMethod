@@ -9,8 +9,8 @@ import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 public fun EntryProviderScope<NavKey>.mapEntry() {
-    entry<MapNavKey> {
-        val viewModel: MapViewModel = hiltViewModel()
+    entry<MapNavKey> { key ->
+        val viewModel = hiltViewModel<MapViewModel, MapViewModel.Factory> { factory -> factory.create(key) }
         val state by viewModel.collectAsState()
         val cascade = rememberLogCascadeState(state)
         val completion = rememberCompletionState(state)

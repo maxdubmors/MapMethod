@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import dev.stekl0.mapmethod.core.model.Flag
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiDevice
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiTheme
 import org.junit.Rule
@@ -12,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// A copy of FranceMask in :core:database, which the tests keep out of reach; update both together.
+// A copy of France in the :core:data catalogue, which is internal to it; update both together.
 private val FranceRows =
     listOf(
         ".......1......",
@@ -32,6 +33,8 @@ private val FranceRows =
 
 private val FranceCellCount = FranceRows.sumOf { line -> line.count { it == '1' } }
 
+private val FranceFlag = Flag(bands = listOf(0xFF0055A4.toInt(), 0xFFFFFFFF.toInt(), 0xFFEF4135.toInt()))
+
 /** France with its first [filledCount] Cells in fill order filled: row by row, west to east. */
 private fun franceMap(filledCount: Int): MapUiState {
     val positions =
@@ -48,7 +51,13 @@ private fun franceMap(filledCount: Int): MapUiState {
                 isNext = orderIndex == filledCount,
             )
         }
-    return MapUiState(cells = cells, filledCount = filledCount, totalCount = cells.size)
+    return MapUiState(
+        cells = cells,
+        filledCount = filledCount,
+        totalCount = cells.size,
+        isLoaded = true,
+        flag = FranceFlag,
+    )
 }
 
 @Composable

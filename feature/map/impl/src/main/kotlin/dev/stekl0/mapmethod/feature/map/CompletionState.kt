@@ -15,8 +15,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import dev.stekl0.mapmethod.core.designsystem.motion.isReducedMotion
-import dev.stekl0.mapmethod.core.designsystem.theme.LocalNotebookPalette
-import dev.stekl0.mapmethod.core.designsystem.theme.NotebookPalette
 import dev.stekl0.mapmethod.core.ui.CellRecolour
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -29,14 +27,13 @@ private val WaveNotStarted = Long.MIN_VALUE / 2
 
 /**
  * Completion, the one celebrated moment: once the Log cascade ends, a wave turns the Map from
- * graphite into the flag colours in fill order, and as it ends confetti fires once. The Map's state
+ * graphite into its flag colours in fill order, and as it ends confetti fires once. The Map's state
  * alone already shows the flag colours, so a Completion that never plays leaves the right picture.
  */
 @Stable
 internal class CompletionState(
     private val scope: CoroutineScope,
     private val mapState: State<MapUiState>,
-    private val palette: State<NotebookPalette>,
 ) {
     // The wave playing now: set from the Completion event, so the Map stays graphite until it starts.
     private var wave: List<WaveRecolour>? by mutableStateOf(null)
@@ -102,7 +99,7 @@ internal class CompletionState(
     }
 
     private suspend fun fireConfetti() {
-        var current = confettiBurst(screenSize, confettiColors(palette.value), Random.Default)
+        var current = confettiBurst(screenSize, confettiColors(mapState.value.flag), Random.Default)
         if (current.isOver) return
         confetti = current
         try {
@@ -135,6 +132,5 @@ private suspend fun playFrames(onFrame: (frameMillis: Long) -> Boolean) {
 internal fun rememberCompletionState(state: MapUiState): CompletionState {
     val scope = rememberCoroutineScope()
     val mapState = rememberUpdatedState(state)
-    val palette = rememberUpdatedState(LocalNotebookPalette.current)
-    return remember(scope, mapState, palette) { CompletionState(scope, mapState, palette) }
+    return remember(scope, mapState) { CompletionState(scope, mapState) }
 }

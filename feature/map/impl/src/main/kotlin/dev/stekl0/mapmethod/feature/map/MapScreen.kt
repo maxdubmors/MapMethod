@@ -49,7 +49,7 @@ internal fun MapScreen(
     onLogCount: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val remaining = state.totalCount - state.filledCount
+    val remaining = state.remaining
     var entryText by rememberSaveable { mutableStateOf("1") }
     val count = if (remaining < 1) null else parseLogCount(entryText, remaining)
     Box(modifier = modifier.fillMaxSize()) {
@@ -103,12 +103,14 @@ private fun MapCanvas(
     val cols = remember(cells) { (cells.maxOfOrNull { it.col } ?: -1) + 1 }
     val palette = LocalNotebookPalette.current
     val notebookCells =
-        remember(cells, cols, previewCount, state.isComplete, palette) {
+        remember(cells, cols, previewCount, state.isLoaded, state.isComplete, state.flag, palette) {
             notebookCells(
                 cells = cells,
                 cols = cols,
-                preview = previewOrderIndexes(cells, previewCount),
+                // No Cell is next until the progress is read.
+                preview = if (state.isLoaded) previewOrderIndexes(cells, previewCount) else emptySet(),
                 isComplete = state.isComplete,
+                flag = state.flag,
                 palette = palette,
             )
         }

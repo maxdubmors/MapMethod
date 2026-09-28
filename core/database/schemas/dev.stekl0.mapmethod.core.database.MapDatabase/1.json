@@ -2,47 +2,36 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "91408e2205796e27d33168b00664e8e7",
+    "identityHash": "dd4624619e716f88814e42196c2cb887",
     "entities": [
       {
-        "tableName": "cells",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orderIndex` INTEGER NOT NULL, `row` INTEGER NOT NULL, `col` INTEGER NOT NULL, `filledAt` INTEGER, PRIMARY KEY(`orderIndex`))",
+        "tableName": "map_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mapId` TEXT NOT NULL, `filledCount` INTEGER NOT NULL, PRIMARY KEY(`mapId`))",
         "fields": [
           {
-            "fieldPath": "orderIndex",
-            "columnName": "orderIndex",
-            "affinity": "INTEGER",
+            "fieldPath": "mapId",
+            "columnName": "mapId",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "row",
-            "columnName": "row",
+            "fieldPath": "filledCount",
+            "columnName": "filledCount",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "col",
-            "columnName": "col",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "filledAt",
-            "columnName": "filledAt",
-            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "orderIndex"
+            "mapId"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '91408e2205796e27d33168b00664e8e7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dd4624619e716f88814e42196c2cb887')"
     ]
   }
 }

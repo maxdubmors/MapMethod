@@ -7,16 +7,13 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Fixed colours of the notebook sheet the Map is drawn on. Unlike [androidx.compose.material3.ColorScheme]
- * they never follow the wallpaper, so pencil always looks like pencil.
+ * they never follow the wallpaper, so pencil always looks like pencil. A Map's flag colours are its own.
  *
  * @property paper the sheet itself.
  * @property gridLine the faint grid printed across the whole sheet.
  * @property countryTint a country's Cell that is not filled yet.
  * @property graphite a filled Cell while its Map is in progress.
  * @property previewOutline the dashed outline of the next Cells a Log would fill.
- * @property flagBlue the blue band of the French flag, the Map's colour at Completion.
- * @property flagWhite the white band of the French flag, the Map's colour at Completion.
- * @property flagRed the red band of the French flag, the Map's colour at Completion.
  */
 @Immutable
 public data class NotebookPalette(
@@ -25,9 +22,6 @@ public data class NotebookPalette(
     val countryTint: Color,
     val graphite: Color,
     val previewOutline: Color,
-    val flagBlue: Color,
-    val flagWhite: Color,
-    val flagRed: Color,
 ) {
     public companion object {
         // Paper, grid line and graphite match the launcher icon.
@@ -38,9 +32,6 @@ public data class NotebookPalette(
                 countryTint = Color(0xFFEFE9D9),
                 graphite = Color(0xFF45474A),
                 previewOutline = Color(0xFF45474A),
-                flagBlue = Color(0xFF0055A4),
-                flagWhite = Color(0xFFFFFFFF),
-                flagRed = Color(0xFFEF4135),
             )
 
         // Dark paper with light, chalk-like graphite, so the Map never glares at night.
@@ -51,9 +42,6 @@ public data class NotebookPalette(
                 countryTint = Color(0xFF33332F),
                 graphite = Color(0xFFC9C9C4),
                 previewOutline = Color(0xFFC9C9C4),
-                flagBlue = Color(0xFF0055A4),
-                flagWhite = Color(0xFFEAE8E2),
-                flagRed = Color(0xFFEF4135),
             )
     }
 }

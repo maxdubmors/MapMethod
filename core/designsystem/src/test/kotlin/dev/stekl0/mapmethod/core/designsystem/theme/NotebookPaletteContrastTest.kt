@@ -27,6 +27,16 @@ class NotebookPaletteContrastTest {
     }
 
     @Test
+    fun `the preview outline stands out on empty Cells in the light theme`() {
+        assertContrast(NotebookPalette.Light.previewOutline, NotebookPalette.Light.countryTint, MIN_GRAPHIC_CONTRAST)
+    }
+
+    @Test
+    fun `the preview outline stands out on empty Cells in the dark theme`() {
+        assertContrast(NotebookPalette.Dark.previewOutline, NotebookPalette.Dark.countryTint, MIN_GRAPHIC_CONTRAST)
+    }
+
+    @Test
     fun `dark paper carries chalk-light graphite while light paper carries dark graphite`() {
         assertTrue(NotebookPalette.Dark.paper.luminance() < NotebookPalette.Dark.graphite.luminance())
         assertTrue(NotebookPalette.Light.paper.luminance() > NotebookPalette.Light.graphite.luminance())
@@ -47,5 +57,8 @@ class NotebookPaletteContrastTest {
     private companion object {
         // Material's text minimum: stricter than the 3:1 for graphics, so filled Cells read at a glance.
         const val MIN_CONTRAST = 4.5
+
+        // Material's minimum for graphics, enough for a dashed outline.
+        const val MIN_GRAPHIC_CONTRAST = 3.0
     }
 }
