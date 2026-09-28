@@ -3,6 +3,7 @@ package dev.stekl0.mapmethod.feature.start
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import dev.stekl0.mapmethod.core.screenshottesting.captureMultiDevice
 import dev.stekl0.mapmethod.core.screenshottesting.captureMultiTheme
 import org.junit.Rule
 import org.junit.Test
@@ -22,6 +23,13 @@ class StartScreenScreenshotTest {
     @Test
     fun `Start with the motif assembled`() {
         composeRule.captureMultiTheme(name = "start", settleMillis = SettledMillis) {
+            StartScreen(title = "MapMethod", onShowMap = {})
+        }
+    }
+
+    @Test
+    fun `Start on every window size`() {
+        composeRule.captureMultiDevice(name = "start", settleMillis = SettledMillis) {
             StartScreen(title = "MapMethod", onShowMap = {})
         }
     }

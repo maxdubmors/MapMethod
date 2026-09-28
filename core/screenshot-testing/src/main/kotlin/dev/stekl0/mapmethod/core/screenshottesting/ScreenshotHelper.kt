@@ -16,11 +16,19 @@ import org.robolectric.RuntimeEnvironment
 public typealias ScreenshotTestRule =
     AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>
 
+/**
+ * A theme a screen is captured in. Without dynamic colour the capture pins the theme's own fallback
+ * scheme; with it, the scheme drawn from the wallpaper colours Robolectric reports. The notebook
+ * palette is the same either way.
+ */
 private enum class ScreenshotTheme(
     val darkTheme: Boolean,
+    val dynamicColor: Boolean,
 ) {
-    LIGHT(darkTheme = false),
-    DARK(darkTheme = true),
+    LIGHT(darkTheme = false, dynamicColor = false),
+    DARK(darkTheme = true, dynamicColor = false),
+    LIGHT_DYNAMIC(darkTheme = false, dynamicColor = true),
+    DARK_DYNAMIC(darkTheme = true, dynamicColor = true),
 }
 
 /** A window size a screen is captured at, as Robolectric qualifiers. */
@@ -40,8 +48,9 @@ private data class Shot(
 )
 
 /**
- * Captures [content] inside the app theme, light then dark, as `<name>_light.png` and
- * `<name>_dark.png`, on the device the test is configured for. The test clock moves only when told,
+ * Captures [content] inside the app theme, light and dark, each without and with dynamic colour, as
+ * `<name>_light.png`, `<name>_dark.png`, `<name>_light_dynamic.png` and `<name>_dark_dynamic.png`,
+ * on the device the test is configured for. The test clock moves only when told,
  * so nothing moves on its own: each capture composes [content] afresh, and the clock then runs
  * [settleMillis] so an animation reaches the frame the baseline pins.
  */
@@ -55,7 +64,7 @@ public fun ScreenshotTestRule.captureMultiTheme(
 }
 
 /**
- * Captures [content] in the light app theme on a phone, an unfolded foldable and a tablet, as
+ * Captures [content] in the light app theme without dynamic colour on a phone, an unfolded foldable and a tablet, as
  * `<name>_phone.png`, `<name>_foldable.png` and `<name>_tablet.png`, so a layout is pinned at every
  * window size. The clock runs as in [captureMultiTheme].
  */
@@ -86,9 +95,7 @@ private fun ScreenshotTestRule.captureShots(
             val view =
                 ComposeView(activity).apply {
                     setContent {
-                        // Dynamic colour follows the device's wallpaper, so the capture pins the theme's
-                        // own fallback scheme instead; the notebook palette is the same either way.
-                        MapMethodTheme(darkTheme = shot.theme.darkTheme, dynamicColor = false) {
+                        MapMethodTheme(darkTheme = shot.theme.darkTheme, dynamicColor = shot.theme.dynamicColor) {
                             Surface { content() }
                         }
                     }
