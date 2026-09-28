@@ -1,27 +1,27 @@
 package dev.stekl0.mapmethod.feature.map
 
 import androidx.compose.runtime.Immutable
+import dev.stekl0.mapmethod.core.model.Cell
 import dev.stekl0.mapmethod.core.model.Flag
-
-@Immutable
-public data class CellUi(
-    val orderIndex: Int,
-    val row: Int,
-    val col: Int,
-    val filled: Boolean,
-    val isNext: Boolean,
-)
+import dev.stekl0.mapmethod.core.model.MapWithProgress
 
 @Immutable
 public data class MapUiState(
-    val cells: List<CellUi>,
-    val filledCount: Int,
-    val totalCount: Int,
+    /** The Map shown with its progress; nothing filled until the progress is read. */
+    val map: MapWithProgress,
     /** The Map's progress has been read; before that its Cells show as an empty outline. */
     val isLoaded: Boolean,
-    /** The flag of the Map shown, its colours at Completion. */
-    val flag: Flag,
 ) {
+    /** The Map's Cells in fill order; the first [filledCount] of them are filled. */
+    public val cells: List<Cell> get() = map.cells
+
+    public val filledCount: Int get() = map.filledCount
+
+    public val totalCount: Int get() = map.totalCount
+
+    /** The flag of the Map shown, its colours at Completion. */
+    public val flag: Flag get() = map.definition.flag
+
     /** Cells a Log can still fill; none before the progress is read. */
     public val remaining: Int get() = if (isLoaded) totalCount - filledCount else 0
 

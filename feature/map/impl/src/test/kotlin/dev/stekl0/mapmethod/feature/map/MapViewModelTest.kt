@@ -51,6 +51,9 @@ private class FakeMapRepository(
 
     override fun mapDefinition(id: MapId): MapDefinition = definitions.single { it.id == id }
 
+    override fun loadedMaps(): List<MapWithProgress>? =
+        if (loaded) definitions.map { progress(it.id, filledCounts.value) } else null
+
     override fun loadedMap(id: MapId): MapWithProgress? = if (loaded) progress(id, filledCounts.value) else null
 
     override suspend fun log(id: MapId, count: Int): List<Int> {
@@ -76,18 +79,7 @@ class MapViewModelTest {
 
             viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
-                expectInternalState {
-                    copy(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = false, isNext = true),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = false),
-                            ),
-                        filledCount = 0,
-                        totalCount = 2,
-                        isLoaded = true,
-                    )
-                }
+                expectInternalState { copy(isLoaded = true) }
                 collecting.cancel()
             }
         }
@@ -99,30 +91,12 @@ class MapViewModelTest {
 
             viewModel.testWithInternalState(this) {
                 assertEquals(
-                    MapUiState(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = false, isNext = false),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = false),
-                            ),
-                        filledCount = 0,
-                        totalCount = 2,
-                        isLoaded = false,
-                        flag = OtherTwoCells.flag,
-                    ),
+                    MapUiState(map = MapWithProgress(OtherTwoCells, filledCount = 0), isLoaded = false),
                     viewModel.container.stateFlow.value,
                 )
                 val collecting = runOnCreate()
                 expectInternalState {
-                    copy(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
-                            ),
-                        filledCount = 1,
-                        isLoaded = true,
-                    )
+                    MapUiState(map = MapWithProgress(OtherTwoCells, filledCount = 1), isLoaded = true)
                 }
                 collecting.cancel()
             }
@@ -136,17 +110,7 @@ class MapViewModelTest {
 
             viewModel.testWithInternalState(this) {
                 assertEquals(
-                    MapUiState(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
-                            ),
-                        filledCount = 1,
-                        totalCount = 2,
-                        isLoaded = true,
-                        flag = OtherTwoCells.flag,
-                    ),
+                    MapUiState(map = MapWithProgress(OtherTwoCells, filledCount = 1), isLoaded = true),
                     viewModel.container.stateFlow.value,
                 )
                 val collecting = runOnCreate()
@@ -165,18 +129,7 @@ class MapViewModelTest {
                 skipItems(1)
                 viewModel.logPushUps(1)
                 expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0)))
-                expectInternalState {
-                    copy(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = false, isNext = true),
-                            ),
-                        filledCount = 1,
-                        totalCount = 2,
-                        isLoaded = true,
-                    )
-                }
+                expectInternalState { copy(map = MapWithProgress(TwoCells, filledCount = 1), isLoaded = true) }
                 collecting.cancel()
             }
         }
@@ -192,18 +145,7 @@ class MapViewModelTest {
                 viewModel.logPushUps(2)
                 expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0, 1)))
                 expectSideEffect(MapEvent.Completion)
-                expectInternalState {
-                    copy(
-                        cells =
-                            listOf(
-                                CellUi(orderIndex = 0, row = 0, col = 0, filled = true, isNext = false),
-                                CellUi(orderIndex = 1, row = 0, col = 1, filled = true, isNext = false),
-                            ),
-                        filledCount = 2,
-                        totalCount = 2,
-                        isLoaded = true,
-                    )
-                }
+                expectInternalState { copy(map = MapWithProgress(TwoCells, filledCount = 2), isLoaded = true) }
                 collecting.cancel()
             }
         }

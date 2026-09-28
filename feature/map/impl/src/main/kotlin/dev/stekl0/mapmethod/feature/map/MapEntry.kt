@@ -8,7 +8,8 @@ import dev.stekl0.mapmethod.feature.map.api.MapNavKey
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
-public fun EntryProviderScope<NavKey>.mapEntry() {
+/** The Map destination; [onBack] returns to the Atlas, like the system back gesture. */
+public fun EntryProviderScope<NavKey>.mapEntry(onBack: () -> Unit) {
     entry<MapNavKey> { key ->
         val viewModel = hiltViewModel<MapViewModel, MapViewModel.Factory> { factory -> factory.create(key) }
         val state by viewModel.collectAsState()
@@ -20,6 +21,12 @@ public fun EntryProviderScope<NavKey>.mapEntry() {
                 MapEvent.Completion -> completion.play(cascade)
             }
         }
-        MapScreen(state = state, cascade = cascade, completion = completion, onLogCount = viewModel::logPushUps)
+        MapScreen(
+            state = state,
+            cascade = cascade,
+            completion = completion,
+            onLogCount = viewModel::logPushUps,
+            onBack = onBack,
+        )
     }
 }

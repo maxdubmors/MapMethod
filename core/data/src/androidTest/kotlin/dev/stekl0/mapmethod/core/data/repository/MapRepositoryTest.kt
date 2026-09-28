@@ -156,4 +156,17 @@ class MapRepositoryTest {
 
             assertEquals(MapWithProgress(France, filledCount = 3), repository.loadedMap(FranceMapId))
         }
+
+    @Test
+    fun everyMapWhoseProgressHasBeenReadIsAtHandInCatalogueOrder() =
+        runTest {
+            val repository = repository(MapCatalogue(listOf(twoCellMap, France)))
+            repository.log(FranceMapId, 2)
+            repository.observeMap(FranceMapId).first { it.filledCount == 2 }
+
+            assertEquals(
+                listOf(MapWithProgress(twoCellMap, filledCount = 0), MapWithProgress(France, filledCount = 2)),
+                repository.loadedMaps(),
+            )
+        }
 }

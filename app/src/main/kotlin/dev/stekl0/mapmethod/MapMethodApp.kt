@@ -9,15 +9,17 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import dev.stekl0.mapmethod.core.data.catalogue.FranceMapId
 import dev.stekl0.mapmethod.core.navigation.rememberNavigator
+import dev.stekl0.mapmethod.feature.atlas.api.AtlasNavKey
+import dev.stekl0.mapmethod.feature.atlas.atlasEntry
 import dev.stekl0.mapmethod.feature.map.api.MapNavKey
 import dev.stekl0.mapmethod.feature.map.mapEntry
 import dev.stekl0.mapmethod.feature.start.api.StartNavKey
 import dev.stekl0.mapmethod.feature.start.startEntry
 
 /**
- * Start is the entry destination and navigates one-way to Map; until the Atlas exists, it opens France.
+ * Start is the entry destination and navigates one-way to the Atlas, which becomes the root: back
+ * from the Atlas leaves the app. Opening a Map pushes it on top of the Atlas, and back returns there.
  * Each entry owns its ViewModel through the entry decorators.
  */
 @Composable
@@ -28,8 +30,9 @@ public fun MapMethodApp(
     val title = stringResource(R.string.app_name)
     val entryProvider =
         entryProvider {
-            startEntry(title = title) { navigator.replace(MapNavKey(FranceMapId)) }
-            mapEntry()
+            startEntry(title = title) { navigator.replace(AtlasNavKey) }
+            atlasEntry { mapId -> navigator.navigate(MapNavKey(mapId)) }
+            mapEntry(onBack = navigator::goBack)
         }
 
     Surface(modifier = modifier.fillMaxSize()) {

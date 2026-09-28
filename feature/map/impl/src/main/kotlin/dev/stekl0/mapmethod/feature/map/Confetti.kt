@@ -2,6 +2,7 @@ package dev.stekl0.mapmethod.feature.map
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import dev.stekl0.mapmethod.core.model.Flag
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.exp
@@ -161,3 +162,6 @@ private fun ConfettiPiece.isOnScreen(bounds: Size): Boolean =
     ((y - side) <= bounds.height) && ((x + side) >= 0f) && ((x - side) <= bounds.width)
 
 private fun Random.nextFloat(from: Float, until: Float): Float = from + (nextFloat() * (until - from))
+
+/** The confetti of Completion: small Cells in the colours of the Map's [flag]. */
+internal fun confettiColors(flag: Flag): List<Color> = flag.bands.map { Color(it) }

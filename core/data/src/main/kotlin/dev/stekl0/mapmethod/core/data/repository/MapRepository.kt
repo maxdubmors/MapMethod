@@ -10,6 +10,12 @@ public interface MapRepository {
     /** Every Map with its progress, in catalogue order. */
     public fun observeMaps(): Flow<List<MapWithProgress>>
 
+    /**
+     * Every Map with its progress, in catalogue order, when that progress has already been read, so a
+     * screen can open on it without waiting; null before the first read, as for [loadedMap].
+     */
+    public fun loadedMaps(): List<MapWithProgress>?
+
     /** The Map [id] as the catalogue defines it, at hand at once. */
     public fun mapDefinition(id: MapId): MapDefinition
 

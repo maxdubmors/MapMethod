@@ -1,14 +1,17 @@
 package dev.stekl0.mapmethod.feature.map
 
+import dev.stekl0.mapmethod.core.model.Cell
+
 /**
- * Resolves which unfilled Cells to preview for the current Log entry.
+ * Resolves which unfilled Cells to preview for the current Log entry, of [cells] in fill order whose
+ * first [filledCount] are filled.
  *
  * A null [count] (empty or invalid entry) falls back to the single next Cell
  * so the Map never loses its preview while typing; otherwise the first
  * [count] unfilled Cells in fill order are returned.
  */
-internal fun previewOrderIndexes(cells: List<CellUi>, count: Int?): Set<Int> {
-    val unfilled = cells.asSequence().filter { !it.filled }.sortedBy { it.orderIndex }.toList()
+internal fun previewOrderIndexes(cells: List<Cell>, filledCount: Int, count: Int?): Set<Int> {
+    val unfilled = cells.drop(filledCount)
     return when {
         unfilled.isEmpty() -> emptySet()
         count == null -> setOf(unfilled.first().orderIndex)

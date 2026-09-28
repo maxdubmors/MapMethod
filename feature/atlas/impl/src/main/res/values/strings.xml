@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_atlas_impl_open">Open</string>
+    <string name="feature_atlas_impl_preview_description">Map of %1$s, filled %2$d of %3$d</string>
+    <string name="feature_atlas_impl_previous_map">Previous Map</string>
+    <string name="feature_atlas_impl_next_map">Next Map</string>
+</resources>
