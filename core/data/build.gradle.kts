@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.stekl0.mapmethod.core.data"
+    namespace = "dev.maxdubmors.mapmethod.core.data"
 }
 
 dependencies {

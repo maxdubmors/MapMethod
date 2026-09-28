@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.stekl0.mapmethod.core.ui"
+    namespace = "dev.maxdubmors.mapmethod.core.ui"
 }
 
 dependencies {

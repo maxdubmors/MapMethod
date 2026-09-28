@@ -1,5 +1,5 @@
 import com.android.build.api.dsl.LibraryExtension
-import dev.stekl0.mapmethod.libs
+import dev.maxdubmors.mapmethod.libs
 import io.github.takahirom.roborazzi.RoborazziExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project

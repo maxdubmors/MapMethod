@@ -4,7 +4,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "dev.stekl0.mapmethod.buildlogic"
+group = "dev.maxdubmors.mapmethod.buildlogic"
 
 // Configure the build-logic plugins to target JDK 17
 // This matches the JDK used to build the project, and is not related to what is running on device.

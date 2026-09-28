@@ -7,7 +7,7 @@ plugins {
 
 android {
     defaultConfig {
-        applicationId = "dev.stekl0.mapmethod"
+        applicationId = "dev.maxdubmors.mapmethod"
         versionCode = 1
         versionName = "0.1.0" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
@@ -30,7 +30,7 @@ android {
         unitTests.isIncludeAndroidResources = true
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
-    namespace = "dev.stekl0.mapmethod"
+    namespace = "dev.maxdubmors.mapmethod"
     androidResources {
         generateLocaleConfig = true
     }

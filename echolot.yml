@@ -1,9 +1,9 @@
 project:
-  package: dev.stekl0.mapmethod
+  package: dev.maxdubmors.mapmethod
   _source: derived
   _evidence: "app/build.gradle.kts: applicationId; debug adds .debug suffix (overridden in local.yml)"
-  process: "dev.stekl0.mapmethod*"
-  _process_evidence: "manifest: no android:process; probe: single app process dev.stekl0.mapmethod.debug (pid 4625)"
+  process: "dev.maxdubmors.mapmethod*"
+  _process_evidence: "manifest: no android:process; probe: single app process dev.stekl0.mapmethod.debug (pid 4625), before the rename to dev.maxdubmors.mapmethod"
   source_root: app/src/main/kotlin
 
 scenario:
