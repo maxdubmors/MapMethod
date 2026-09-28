@@ -1,7 +1,10 @@
 package dev.stekl0.mapmethod.feature.atlas
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.unit.LayoutDirection
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import dev.stekl0.mapmethod.core.data.catalogue.France
 import dev.stekl0.mapmethod.core.model.MapWithProgress
@@ -16,7 +19,10 @@ import org.robolectric.annotation.Config
 private fun franceAtlas(filledCount: Int) =
     AtlasUiState(pages = listOf(AtlasPage(MapWithProgress(France, filledCount))))
 
-/** The Atlas is static: the preview never animates, so the capture needs no clock. */
+/**
+ * The Atlas is static: the preview never animates, so the capture needs no clock. With France alone
+ * both chevrons are dimmed; two Maps show the chevron towards the second one enabled.
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(qualifiers = RobolectricDeviceQualifiers.MediumPhone)
 class AtlasScreenScreenshotTest {
@@ -36,6 +42,20 @@ class AtlasScreenScreenshotTest {
     @Test
     fun `complete France in the flag colours`() {
         captureAtlas(name = "atlas_complete", state = franceAtlas(filledCount = France.cells.size))
+    }
+
+    @Test
+    fun `the first of two Maps with the chevron towards the next one enabled`() {
+        captureAtlas(name = "atlas_two_maps", state = TwoMapsAtlas)
+    }
+
+    @Test
+    fun `in a right-to-left layout the chevrons swap sides and point the other way`() {
+        composeRule.captureMultiTheme(name = "atlas_two_maps_rtl") {
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                AtlasScreen(state = TwoMapsAtlas, onOpenMap = {})
+            }
+        }
     }
 
     @Test

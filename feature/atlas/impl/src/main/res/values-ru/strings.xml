@@ -2,4 +2,6 @@
 <resources>
     <string name="feature_atlas_impl_open">Открыть</string>
     <string name="feature_atlas_impl_preview_description">Карта: %1$s, заполнено %2$d из %3$d</string>
+    <string name="feature_atlas_impl_previous_map">Предыдущая карта</string>
+    <string name="feature_atlas_impl_next_map">Следующая карта</string>
 </resources>

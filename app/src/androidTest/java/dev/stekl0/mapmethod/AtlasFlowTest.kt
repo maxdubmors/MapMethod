@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -14,6 +15,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.stekl0.mapmethod.core.data.catalogue.France
@@ -27,7 +31,10 @@ import dev.stekl0.mapmethod.core.ui.R as UiR
 import dev.stekl0.mapmethod.feature.atlas.R as AtlasR
 import dev.stekl0.mapmethod.feature.map.R as MapR
 
-/** Start leads to the Atlas, the Atlas opens a Map, and back from the Map returns to a current Atlas. */
+/**
+ * Start leads to the Atlas, the Atlas opens a Map, and back from the Map returns to a current Atlas.
+ * The Atlas holds France alone, so it does not leaf.
+ */
 class AtlasFlowTest {
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
@@ -79,6 +86,23 @@ class AtlasFlowTest {
         waitForAtlasProgress(filled = 0)
         compose.onNodeWithTag("atlasPreview").assertIsDisplayed()
         compose.onNodeWithTag("openMapButton").assertIsDisplayed()
+    }
+
+    // Flow tests run with system animations off, so this also leafs without motion.
+    @Test
+    fun withFranceAloneBothChevronsAreDimmedAndASwipeKeepsFrance() {
+        goToAtlas()
+        waitForAtlasProgress(filled = 0)
+
+        compose.onNodeWithTag("previousMapButton").assertIsDisplayed().assertIsNotEnabled()
+        compose.onNodeWithTag("nextMapButton").assertIsDisplayed().assertIsNotEnabled()
+        compose.onNodeWithTag("atlasPager").performTouchInput { swipeLeft() }
+        compose.onNodeWithTag("atlasPager").performTouchInput { swipeRight() }
+        compose.waitForIdle()
+
+        assertEquals(string(UiR.string.core_ui_map_name_france), textOf("atlasName"))
+        waitForAtlasProgress(filled = 0)
+        openMap()
     }
 
     @Test
@@ -147,7 +171,7 @@ class AtlasFlowTest {
     }
 
     @Test
-    fun theBackArrowTheOpenButtonAndThePreviewAreLabelledForScreenReaders() {
+    fun theBackArrowTheChevronsTheOpenButtonAndThePreviewAreLabelledForScreenReaders() {
         goToAtlas()
         waitForAtlasProgress(filled = 0)
         val france = string(UiR.string.core_ui_map_name_france)
@@ -156,6 +180,8 @@ class AtlasFlowTest {
             string(AtlasR.string.feature_atlas_impl_preview_description, france, 0, franceCells),
         ).assertIsDisplayed()
         compose.onNodeWithText(string(AtlasR.string.feature_atlas_impl_open)).assertIsDisplayed()
+        compose.onNodeWithContentDescription(string(AtlasR.string.feature_atlas_impl_previous_map)).assertIsDisplayed()
+        compose.onNodeWithContentDescription(string(AtlasR.string.feature_atlas_impl_next_map)).assertIsDisplayed()
 
         openMap()
         compose.onNodeWithContentDescription(string(MapR.string.feature_map_impl_back)).assertIsDisplayed()

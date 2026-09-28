@@ -6,16 +6,20 @@ import dev.stekl0.mapmethod.core.model.MapId
 import dev.stekl0.mapmethod.core.model.MapWithProgress
 import dev.stekl0.mapmethod.core.ui.mapNameRes
 
-/** One page of the Atlas: a Map with its progress, drawn as a preview. */
+/**
+ * One page of the Atlas: a Map with its progress, drawn as a preview. [nameResOverride] names a Map
+ * the catalogue has no name for, such as a second Map made up by a test.
+ */
 @Immutable
 public data class AtlasPage(
     val map: MapWithProgress,
+    @param:StringRes private val nameResOverride: Int? = null,
 ) {
     public val id: MapId get() = map.id
 
-    /** The country's name, looked up by the Map's identity. */
+    /** The country's name, looked up by the Map's identity unless given. */
     @get:StringRes
-    public val nameRes: Int get() = mapNameRes(id)
+    public val nameRes: Int get() = nameResOverride ?: mapNameRes(id)
 
     public val filledCount: Int get() = map.filledCount
 
