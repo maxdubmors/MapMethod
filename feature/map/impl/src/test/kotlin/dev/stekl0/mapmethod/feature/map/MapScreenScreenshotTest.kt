@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// The shape of mainland France as the database seeds it, so the captures show the real Map.
+// A copy of FranceMask in :core:database, which the tests keep out of reach; update both together.
 private val FranceRows =
     listOf(
         ".......1......",

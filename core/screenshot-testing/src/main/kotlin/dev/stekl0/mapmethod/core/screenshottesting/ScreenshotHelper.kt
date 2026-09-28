@@ -11,21 +11,18 @@ import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
 import dev.stekl0.mapmethod.core.designsystem.theme.MapMethodTheme
 
-/** A theme a screen is captured in; its [suffix] ends the baseline's file name. */
 private enum class ScreenshotTheme(
     val darkTheme: Boolean,
-    val suffix: String,
 ) {
-    LIGHT(darkTheme = false, suffix = "light"),
-    DARK(darkTheme = true, suffix = "dark"),
+    LIGHT(darkTheme = false),
+    DARK(darkTheme = true),
 }
 
 /**
  * Captures [content] inside the app theme, light then dark, as `<name>_light.png` and
- * `<name>_dark.png`. The test clock stands still, so nothing moves on its own: each theme composes
- * [content] afresh, and the clock then runs [settleMillis] so an animation reaches the frame the
- * baseline pins. Every theme is captured before a mismatch fails the test. Call it once per test,
- * before anything else sets the content.
+ * `<name>_dark.png`. The test clock moves only when told, so nothing moves on its own: each theme
+ * composes [content] afresh, and the clock then runs [settleMillis] so an animation reaches the
+ * frame the baseline pins. Call it once per test, before anything else sets the content.
  */
 public fun ComposeContentTestRule.captureMultiTheme(
     name: String,
@@ -49,11 +46,11 @@ public fun ComposeContentTestRule.captureMultiTheme(
         ScreenshotTheme.entries.mapNotNull { next ->
             if (theme != next) {
                 theme = next
-                // The clock stands still, so the new theme composes only on the next frame.
+                // The new theme composes on the next frame.
                 mainClock.advanceTimeByFrame()
             }
             mainClock.advanceTimeBy(settleMillis)
-            runCatching { onRoot().captureRoboImage("${name}_${next.suffix}.png") }.exceptionOrNull()
+            runCatching { onRoot().captureRoboImage("${name}_${next.name.lowercase()}.png") }.exceptionOrNull()
         }
     failures.firstOrNull()?.let { first ->
         failures.drop(1).forEach(first::addSuppressed)
