@@ -1,11 +1,4 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(echolot:*)",
-      "Bash(ya tool ast-index *)",
-      "Bash(ast-index *)"
-    ]
-  },
   "extraKnownMarketplaces": {
     "ast-index": {
       "source": {
@@ -16,5 +9,11 @@
   },
   "enabledPlugins": {
     "ast-index@ast-index": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(ya tool ast-index *)",
+      "Bash(ast-index *)"
+    ]
   }
 }
