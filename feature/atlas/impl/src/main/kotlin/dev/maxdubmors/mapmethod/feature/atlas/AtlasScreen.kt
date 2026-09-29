@@ -3,8 +3,10 @@ package dev.maxdubmors.mapmethod.feature.atlas
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,6 +45,10 @@ private val ScreenPadding = 24.dp
 private val ContentSpacing = 16.dp
 private val PreviewMaxWidth = 480.dp
 
+// Bare paper rows above and below the Map in its preview.
+@Suppress("MayBeConst")
+private val PreviewMarginRows = 1
+
 // An icon button's touch target.
 private val ChevronWidth = 48.dp
 
@@ -55,9 +61,9 @@ private val DimmedAlpha = 0.38f
 
 /**
  * The Atlas, one Map at a time: the country's name, a preview of its Map flanked by chevrons, how
- * far along it is and the Open button. Chevrons and swipes leaf through the Maps in catalogue
- * order, with no wrap-around; the page shown is saved, so it survives rotation and returning from a
- * Map.
+ * far along it is and the Open button, together in the middle of the screen. Chevrons and swipes
+ * leaf through the Maps in catalogue order, with no wrap-around; the page shown is saved, so it
+ * survives rotation and returning from a Map.
  */
 @Composable
 internal fun AtlasScreen(
@@ -71,14 +77,14 @@ internal fun AtlasScreen(
                 .fillMaxSize()
                 .safeDrawingPadding()
                 .padding(ScreenPadding),
-        verticalArrangement = Arrangement.spacedBy(ContentSpacing),
+        verticalArrangement = Arrangement.spacedBy(ContentSpacing, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (state.pages.isEmpty()) return@Column
         // Created once the Maps are known, so a saved page is never restored into an empty pager.
         val pagerState = rememberPagerState { state.pages.size }
-        // Takes what the button leaves, so the button stays on screen in landscape too.
-        AtlasPager(state = state, pagerState = pagerState, modifier = Modifier.weight(1f))
+        // Takes no more than the button leaves, so the button stays on screen in landscape too.
+        AtlasPager(state = state, pagerState = pagerState, modifier = Modifier.weight(1f, fill = false))
         Button(
             onClick = { onOpenMap(state.pages[pagerState.currentPage].id) },
             modifier = Modifier.testTag("openMapButton"),
@@ -88,7 +94,10 @@ internal fun AtlasScreen(
     }
 }
 
-/** The pages between the two chevrons; a chevron moves one Map towards its side, or is dimmed at the edge. */
+/**
+ * The pages between the two chevrons; a chevron moves one Map towards its side, or is dimmed at the
+ * edge. Every page keeps room for the tallest preview, so leafing never moves the button.
+ */
 @Composable
 private fun AtlasPager(
     state: AtlasUiState,
@@ -96,6 +105,7 @@ private fun AtlasPager(
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
+    val slotAspectRatio = remember(state.pages) { state.pages.minOf { previewAspectRatio(it) } }
 
     // Steps from the page being moved to, so a second tap during the motion moves on once more.
     fun leaf(by: Int) {
@@ -116,7 +126,11 @@ private fun AtlasPager(
             state = pagerState,
             modifier = Modifier.weight(1f).testTag("atlasPager"),
         ) { index ->
-            AtlasPageContent(page = state.pages[index], modifier = Modifier.fillMaxSize())
+            AtlasPageContent(
+                page = state.pages[index],
+                slotAspectRatio = slotAspectRatio,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
         Chevron(
             iconRes = R.drawable.feature_atlas_impl_ic_next,
@@ -152,10 +166,11 @@ private fun Chevron(
     }
 }
 
-/** One Map: its name, its preview and how far along it is. */
+/** One Map: its name, its preview centred in a slot shaped by [slotAspectRatio] and how far along it is. */
 @Composable
 private fun AtlasPageContent(
     page: AtlasPage,
+    slotAspectRatio: Float,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -170,17 +185,25 @@ private fun AtlasPageContent(
             textAlign = TextAlign.Center,
             modifier = Modifier.testTag("atlasName"),
         )
-        AtlasPreview(
-            page = page,
-            name = name,
+        // Narrower than the widest preview when the page is too short for its height.
+        Box(
             modifier =
                 Modifier
-                    .weight(1f)
+                    .weight(1f, fill = false)
                     .widthIn(max = PreviewMaxWidth)
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.large)
-                    .testTag("atlasPreview"),
-        )
+                    .aspectRatio(slotAspectRatio),
+            contentAlignment = Alignment.Center,
+        ) {
+            AtlasPreview(
+                page = page,
+                name = name,
+                modifier =
+                    Modifier
+                        .aspectRatio(previewAspectRatio(page))
+                        .clip(MaterialTheme.shapes.large)
+                        .testTag("atlasPreview"),
+            )
+        }
         Text(
             text = stringResource(UiR.string.core_ui_map_progress, page.filledCount, page.totalCount),
             style = MaterialTheme.typography.titleLarge,
@@ -188,6 +211,12 @@ private fun AtlasPageContent(
             modifier = Modifier.testTag("atlasProgress"),
         )
     }
+}
+
+// As tall as the Map with a bare row above and below.
+private fun previewAspectRatio(page: AtlasPage): Float {
+    val definition = page.map.definition
+    return definition.cols.coerceAtLeast(1).toFloat() / (definition.rows + (PreviewMarginRows * 2))
 }
 
 /** The Map as it stands, in pencil or in its flag colours: a still snapshot with no next Cell outlined. */

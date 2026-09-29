@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import dev.maxdubmors.mapmethod.core.data.catalogue.France
 import dev.maxdubmors.mapmethod.core.designsystem.theme.MapMethodTheme
 import dev.maxdubmors.mapmethod.core.model.MapId
+import dev.maxdubmors.mapmethod.core.model.MapWithProgress
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -159,5 +160,19 @@ class AtlasScreenTest {
         assertTrue(next().getUnclippedBoundsInRoot().right < previous().getUnclippedBoundsInRoot().left)
         pager().performTouchInput { swipeRight() }
         assertShowing(filled = 7)
+    }
+
+    @Test
+    fun `leafing to a flatter Map keeps the button where it was`() {
+        val flatMap = France.copy(id = MapId("flat"), cells = France.cells.filter { it.row < 4 })
+        val flatPage =
+            AtlasPage(MapWithProgress(flatMap, filledCount = 0), nameResOverride = android.R.string.unknownName)
+        showAtlas(state = AtlasUiState(pages = TwoMapsAtlas.pages.take(1) + flatPage))
+        val button = compose.onNodeWithTag("openMapButton")
+        val before = button.getUnclippedBoundsInRoot()
+
+        next().performClick()
+
+        assertEquals(before, button.getUnclippedBoundsInRoot())
     }
 }
