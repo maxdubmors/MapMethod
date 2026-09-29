@@ -16,6 +16,19 @@ android {
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }
 
+    // The upload key lives outside the repository: its path and passwords come from ~/.gradle/gradle.properties.
+    // Without them the release build is left unsigned.
+    val releaseStoreFile = providers.gradleProperty("mapmethod.signing.storeFile").orNull
+    val releaseSigning =
+        releaseStoreFile?.let { path ->
+            signingConfigs.create("release") {
+                storeFile = file(path)
+                storePassword = providers.gradleProperty("mapmethod.signing.storePassword").get()
+                keyAlias = providers.gradleProperty("mapmethod.signing.keyAlias").get()
+                keyPassword = providers.gradleProperty("mapmethod.signing.keyPassword").get()
+            }
+        }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -24,6 +37,7 @@ android {
             optimization {
                 enable = true
             }
+            signingConfig = releaseSigning
         }
     }
     testOptions {

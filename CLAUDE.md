@@ -14,6 +14,10 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Single-context: one `CONTEXT.md` plus `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+## Release build
+
+`./gradlew :app:assembleRelease` builds `app/build/outputs/apk/release/app-release.apk`, signed with the upload key named by the `mapmethod.signing.*` properties in `~/.gradle/gradle.properties`; without them the APK comes out as `app-release-unsigned.apk`. Never print or copy those properties.
+
 ## Screenshot tests
 
 Modules opt in with the `mapmethod.android.screenshot` plugin; baselines live in the module's `src/test/screenshots`, recorded on Linux and committed.
