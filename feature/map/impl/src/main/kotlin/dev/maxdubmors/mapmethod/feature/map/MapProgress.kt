@@ -33,7 +33,7 @@ internal fun MapProgress(state: MapUiState, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         LinearProgressIndicator(
-            progress = { progressFraction(filled, state.totalCount) },
+            progress = { (filled / state.map.totalCount).coerceIn(0f, 1f) },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -52,7 +52,7 @@ internal fun MapProgress(state: MapUiState, modifier: Modifier = Modifier) {
                     }
 
                     else -> {
-                        stringResource(UiR.string.core_ui_map_progress, filled.roundToInt(), state.totalCount)
+                        stringResource(UiR.string.core_ui_map_progress, filled.roundToInt(), state.map.totalCount)
                     }
                 },
             style = MaterialTheme.typography.titleLarge,
@@ -68,9 +68,9 @@ internal fun MapProgress(state: MapUiState, modifier: Modifier = Modifier) {
  */
 @Composable
 private fun animateFilledCount(state: MapUiState): State<Float> {
-    val filled = remember(state.isLoaded) { Animatable(state.filledCount.toFloat()) }
-    LaunchedEffect(filled, state.filledCount) {
-        filled.animateTo(state.filledCount.toFloat(), ProgressIndicatorDefaults.ProgressAnimationSpec)
+    val filled = remember(state.isLoaded) { Animatable(state.map.filledCount.toFloat()) }
+    LaunchedEffect(filled, state.map.filledCount) {
+        filled.animateTo(state.map.filledCount.toFloat(), ProgressIndicatorDefaults.ProgressAnimationSpec)
     }
     return filled.asState()
 }

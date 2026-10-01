@@ -21,7 +21,7 @@ import dev.maxdubmors.mapmethod.core.ui.R as UiR
 private val France =
     MapDefinition(
         id = MapId("france"),
-        cells = listOf(Cell(orderIndex = 0, row = 0, col = 0), Cell(orderIndex = 1, row = 0, col = 1)),
+        cells = listOf(Cell(row = 0, col = 0), Cell(row = 0, col = 1)),
         flag = Flag(bands = listOf(0xFF000001.toInt(), 0xFF000002.toInt())),
     )
 
@@ -78,8 +78,8 @@ class AtlasViewModelTest {
                 collecting.cancel()
             }
             val pages = viewModel.container.stateFlow.value.pages
-            assertEquals(listOf(France.id, OtherFrance.id), pages.map { it.id })
-            assertEquals(listOf(0, 1), pages.map { it.filledCount })
+            assertEquals(listOf(France.id, OtherFrance.id), pages.map { it.map.id })
+            assertEquals(listOf(0, 1), pages.map { it.map.filledCount })
             assertEquals(UiR.string.core_ui_map_name_france, pages.first().nameRes)
         }
 
@@ -91,9 +91,9 @@ class AtlasViewModelTest {
 
             val page = viewModel.container.stateFlow.value.pages.single()
 
-            assertEquals(France.id, page.id)
-            assertEquals(1, page.filledCount)
-            assertEquals(2, page.totalCount)
+            assertEquals(France.id, page.map.id)
+            assertEquals(1, page.map.filledCount)
+            assertEquals(2, page.map.totalCount)
         }
 
     @Test
@@ -127,10 +127,10 @@ class AtlasViewModelTest {
 
             viewModel.testWithInternalState(this) {
                 val collecting = runOnCreate()
-                assertFalse(viewModel.container.stateFlow.value.pages.single().isComplete)
+                assertFalse(viewModel.container.stateFlow.value.pages.single().map.isComplete)
                 repository.filledCounts.value = mapOf(France.id to 2)
                 expectInternalState { AtlasUiState(pages = listOf(francePage(filledCount = 2))) }
-                assertTrue(viewModel.container.stateFlow.value.pages.single().isComplete)
+                assertTrue(viewModel.container.stateFlow.value.pages.single().map.isComplete)
                 collecting.cancel()
             }
         }

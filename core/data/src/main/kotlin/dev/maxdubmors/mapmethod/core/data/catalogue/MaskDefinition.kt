@@ -13,7 +13,7 @@ internal fun maskDefinition(id: MapId, mask: List<String>, flag: Flag): MapDefin
     val cells = mutableListOf<Cell>()
     mask.forEachIndexed { row, line ->
         line.forEachIndexed { col, mark ->
-            if (mark == '1') cells.add(Cell(orderIndex = cells.size, row = row, col = col))
+            if (mark == '1') cells.add(Cell(row = row, col = col))
         }
     }
     return MapDefinition(id = id, cells = cells, flag = flag)

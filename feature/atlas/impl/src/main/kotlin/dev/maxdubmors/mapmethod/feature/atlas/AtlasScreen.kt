@@ -86,7 +86,7 @@ internal fun AtlasScreen(
         // Takes no more than the button leaves, so the button stays on screen in landscape too.
         AtlasPager(state = state, pagerState = pagerState, modifier = Modifier.weight(1f, fill = false))
         Button(
-            onClick = { onOpenMap(state.pages[pagerState.currentPage].id) },
+            onClick = { onOpenMap(state.pages[pagerState.currentPage].map.id) },
             modifier = Modifier.testTag("openMapButton"),
         ) {
             Text(text = stringResource(R.string.feature_atlas_impl_open))
@@ -205,7 +205,7 @@ private fun AtlasPageContent(
             )
         }
         Text(
-            text = stringResource(UiR.string.core_ui_map_progress, page.filledCount, page.totalCount),
+            text = stringResource(UiR.string.core_ui_map_progress, page.map.filledCount, page.map.totalCount),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.testTag("atlasProgress"),
@@ -229,7 +229,7 @@ private fun AtlasPreview(
     val palette = LocalNotebookPalette.current
     val cells = remember(page.map, palette) { mapCells(page.map, palette) }
     val description =
-        stringResource(R.string.feature_atlas_impl_preview_description, name, page.filledCount, page.totalCount)
+        stringResource(R.string.feature_atlas_impl_preview_description, name, page.map.filledCount, page.map.totalCount)
     NotebookCellGrid(
         rows = page.map.definition.rows,
         cols = page.map.definition.cols,

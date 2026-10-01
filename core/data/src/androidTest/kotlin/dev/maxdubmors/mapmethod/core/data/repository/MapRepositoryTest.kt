@@ -31,7 +31,7 @@ class MapRepositoryTest {
     private val twoCellMap =
         MapDefinition(
             id = MapId("two-cells"),
-            cells = listOf(Cell(orderIndex = 0, row = 0, col = 0), Cell(orderIndex = 1, row = 0, col = 1)),
+            cells = listOf(Cell(row = 0, col = 0), Cell(row = 0, col = 1)),
             flag = Flag(bands = listOf(0xFF000000.toInt())),
         )
 

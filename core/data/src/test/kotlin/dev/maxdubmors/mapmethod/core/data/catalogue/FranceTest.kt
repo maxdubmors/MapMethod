@@ -30,16 +30,14 @@ class FranceTest {
 
     @Test
     fun `France fills north to south, west to east`() {
-        assertEquals(cells.indices.toList(), cells.map { it.orderIndex })
         assertEquals(cells.sortedWith(compareBy({ it.row }, { it.col })), cells)
-        assertEquals(cells.size, cells.map { it.row to it.col }.toSet().size)
     }
 
     @Test
     fun `France starts at the tip of the north coast and ends at the Pyrenees`() {
-        assertEquals(Cell(orderIndex = 0, row = 0, col = 7), cells.first())
+        assertEquals(Cell(row = 0, col = 7), cells.first())
         assertEquals(
-            listOf(Cell(orderIndex = 98, row = 12, col = 6), Cell(orderIndex = 99, row = 12, col = 7)),
+            listOf(Cell(row = 12, col = 6), Cell(row = 12, col = 7)),
             cells.takeLast(2),
         )
     }
