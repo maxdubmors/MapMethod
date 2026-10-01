@@ -1,6 +1,7 @@
 package dev.maxdubmors.mapmethod.feature.map
 
 import androidx.compose.runtime.Immutable
+import dev.maxdubmors.mapmethod.core.model.LogOutcome
 
 /**
  * One-shot events of the Map. [MapUiState] alone still describes what is filled, so a missed event
@@ -8,11 +9,8 @@ import androidx.compose.runtime.Immutable
  */
 @Immutable
 public sealed interface MapEvent {
-    /** A Log just filled the Cells at [orderIndexes], in fill order. */
-    public data class LogFilled(
-        val orderIndexes: List<Int>,
+    /** A Log just filled Cells: [outcome] holds the Map before and after it, and whether it brought Completion. */
+    public data class Logged(
+        val outcome: LogOutcome,
     ) : MapEvent
-
-    /** Completion: the Log just before this event filled the Map's last Cell. */
-    public data object Completion : MapEvent
 }

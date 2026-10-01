@@ -3,6 +3,7 @@ package dev.maxdubmors.mapmethod.feature.atlas
 import dev.maxdubmors.mapmethod.core.data.repository.MapRepository
 import dev.maxdubmors.mapmethod.core.model.Cell
 import dev.maxdubmors.mapmethod.core.model.Flag
+import dev.maxdubmors.mapmethod.core.model.LogOutcome
 import dev.maxdubmors.mapmethod.core.model.MapDefinition
 import dev.maxdubmors.mapmethod.core.model.MapId
 import dev.maxdubmors.mapmethod.core.model.MapWithProgress
@@ -52,7 +53,7 @@ private class FakeMapRepository(
 
     override fun loadedMap(id: MapId): MapWithProgress? = error("The Atlas observes every Map at once")
 
-    override suspend fun log(id: MapId, count: Int): List<Int> = error("The Atlas never logs")
+    override suspend fun log(id: MapId, count: Int): LogOutcome = error("The Atlas never logs")
 }
 
 class AtlasViewModelTest {

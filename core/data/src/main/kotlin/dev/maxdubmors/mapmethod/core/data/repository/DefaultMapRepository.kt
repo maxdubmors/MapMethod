@@ -3,6 +3,7 @@ package dev.maxdubmors.mapmethod.core.data.repository
 import dev.maxdubmors.mapmethod.core.data.catalogue.MapCatalogue
 import dev.maxdubmors.mapmethod.core.data.di.ApplicationScope
 import dev.maxdubmors.mapmethod.core.database.dao.MapProgressDao
+import dev.maxdubmors.mapmethod.core.model.LogOutcome
 import dev.maxdubmors.mapmethod.core.model.MapDefinition
 import dev.maxdubmors.mapmethod.core.model.MapId
 import dev.maxdubmors.mapmethod.core.model.MapWithProgress
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -51,11 +53,19 @@ internal class DefaultMapRepository
             return loadedFilledCounts.value?.let { definition.withProgress(it) }
         }
 
-        override suspend fun log(id: MapId, count: Int): List<Int> {
-            if (count <= 0) return emptyList()
+        override suspend fun log(id: MapId, count: Int): LogOutcome {
             val definition = catalogue[id]
+            if (count <= 0) {
+                // A Log of nothing writes nothing; the Map stays as it is.
+                val filledCount = mapProgressDao.observeFilledCount(id.value).first() ?: 0
+                val current = MapWithProgress(definition, filledCount)
+                return LogOutcome(before = current, after = current)
+            }
             val change = mapProgressDao.addFilled(id.value, count = count, cellCount = definition.cells.size)
-            return definition.cells.subList(change.before, change.after).map { it.orderIndex }
+            return LogOutcome(
+                before = MapWithProgress(definition, filledCount = change.before),
+                after = MapWithProgress(definition, filledCount = change.after),
+            )
         }
     }
 

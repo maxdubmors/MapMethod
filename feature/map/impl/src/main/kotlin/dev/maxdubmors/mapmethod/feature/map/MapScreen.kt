@@ -49,8 +49,7 @@ private val MaxZoom = 4f
 @Composable
 internal fun MapScreen(
     state: MapUiState,
-    cascade: LogCascadeState,
-    completion: CompletionState,
+    playback: LogPlayback,
     onLogCount: (Int) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -71,8 +70,7 @@ internal fun MapScreen(
             BackButton(onClick = onBack, modifier = Modifier.align(Alignment.Start))
             MapCanvas(
                 state = state,
-                cascade = cascade,
-                completion = completion,
+                playback = playback,
                 previewCount = count,
                 modifier =
                     Modifier
@@ -89,7 +87,7 @@ internal fun MapScreen(
                 onLogCount = onLogCount,
             )
         }
-        ConfettiOverlay(completion = completion, modifier = Modifier.matchParentSize())
+        ConfettiOverlay(playback = playback, modifier = Modifier.matchParentSize())
     }
 }
 
@@ -108,8 +106,7 @@ private fun BackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 private fun MapCanvas(
     state: MapUiState,
-    cascade: LogCascadeState,
-    completion: CompletionState,
+    playback: LogPlayback,
     previewCount: Int?,
     modifier: Modifier = Modifier,
 ) {
@@ -131,8 +128,6 @@ private fun MapCanvas(
                     if (state.isLoaded) previewOrderIndexes(cells, state.filledCount, previewCount) else emptySet(),
             )
         }
-    val stampClock = cascade.rememberStampClock(cells)
-    val recolour = completion.rememberCellRecolour(cells, palette.graphite)
     val transform =
         rememberTransformableState { _, zoomChange, panChange, _ ->
             scale = (scale * zoomChange).coerceIn(MinZoom, MaxZoom)
@@ -151,8 +146,8 @@ private fun MapCanvas(
         rows = rows,
         cols = cols,
         cells = notebookCells,
-        stampClock = stampClock,
-        recolour = recolour,
+        stampClock = playback.stampClock,
+        recolour = playback.recolour,
         modifier =
             modifier
                 // Outside the zoom layer, so the scaled sheet never spills over the controls.

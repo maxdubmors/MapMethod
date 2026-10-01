@@ -22,15 +22,14 @@ private fun franceMap(filledCount: Int): MapUiState =
 private fun MapScreenOf(state: MapUiState) {
     MapScreen(
         state = state,
-        cascade = rememberLogCascadeState(state),
-        completion = rememberCompletionState(state),
+        playback = rememberLogPlayback(state),
         onLogCount = {},
         onBack = {},
     )
 }
 
 /**
- * The Map as its state alone draws it: no Log cascade or Completion plays, so every Cell is
+ * The Map as its state alone draws it: no Cascade or Completion plays, so every Cell is
  * settled and the capture needs no clock.
  */
 @RunWith(RobolectricTestRunner::class)

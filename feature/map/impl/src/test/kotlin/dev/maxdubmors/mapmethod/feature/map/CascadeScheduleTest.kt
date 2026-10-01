@@ -18,7 +18,7 @@ class CascadeScheduleTest {
 
     @Test
     fun `Cells stamp in fill order`() {
-        assertEquals(listOf(3, 4, 5, 6), cascadeSchedule(listOf(5, 3, 6, 4)).map { it.orderIndex })
+        assertEquals(listOf(3, 4, 5, 6), cascadeSchedule(listOf(5, 3, 6, 4)).map { it.position })
     }
 
     @Test

@@ -3,6 +3,7 @@ package dev.maxdubmors.mapmethod.feature.map
 import dev.maxdubmors.mapmethod.core.data.repository.MapRepository
 import dev.maxdubmors.mapmethod.core.model.Cell
 import dev.maxdubmors.mapmethod.core.model.Flag
+import dev.maxdubmors.mapmethod.core.model.LogOutcome
 import dev.maxdubmors.mapmethod.core.model.MapDefinition
 import dev.maxdubmors.mapmethod.core.model.MapId
 import dev.maxdubmors.mapmethod.core.model.MapWithProgress
@@ -56,14 +57,16 @@ private class FakeMapRepository(
 
     override fun loadedMap(id: MapId): MapWithProgress? = if (loaded) progress(id, filledCounts.value) else null
 
-    override suspend fun log(id: MapId, count: Int): List<Int> {
-        if (count <= 0) return emptyList()
+    override suspend fun log(id: MapId, count: Int): LogOutcome {
         val before = filledCounts.value.getValue(id)
-        val after = (before + count).coerceAtMost(mapDefinition(id).cells.size)
+        val after = (before + count.coerceAtLeast(0)).coerceAtMost(mapDefinition(id).cells.size)
         filledCounts.value += id to after
-        return (before until after).toList()
+        return LogOutcome(MapWithProgress(mapDefinition(id), before), MapWithProgress(mapDefinition(id), after))
     }
 }
+
+private fun logged(map: MapDefinition, before: Int, after: Int) =
+    MapEvent.Logged(LogOutcome(MapWithProgress(map, before), MapWithProgress(map, after)))
 
 private fun mapViewModel(
     repository: MapRepository = FakeMapRepository(),
@@ -128,7 +131,7 @@ class MapViewModelTest {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
-                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0)))
+                expectSideEffect(logged(TwoCells, before = 0, after = 1))
                 expectInternalState { copy(map = MapWithProgress(TwoCells, filledCount = 1), isLoaded = true) }
                 collecting.cancel()
             }
@@ -143,8 +146,7 @@ class MapViewModelTest {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(2)
-                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0, 1)))
-                expectSideEffect(MapEvent.Completion)
+                expectSideEffect(logged(TwoCells, before = 0, after = 2))
                 expectInternalState { copy(map = MapWithProgress(TwoCells, filledCount = 2), isLoaded = true) }
                 collecting.cancel()
             }
@@ -159,15 +161,14 @@ class MapViewModelTest {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(5)
-                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(1)))
-                expectSideEffect(MapEvent.Completion)
+                expectSideEffect(logged(TwoCells, before = 1, after = 2))
                 skipItems(1)
                 collecting.cancel()
             }
         }
 
     @Test
-    fun `a Log that fills the last Cell emits Completion once, after its Cells`() =
+    fun `a Log after the one that completed the Map emits nothing`() =
         runTest {
             val viewModel = mapViewModel(FakeMapRepository(initialFilledCount = 1))
 
@@ -175,8 +176,7 @@ class MapViewModelTest {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
-                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(1)))
-                expectSideEffect(MapEvent.Completion)
+                expectSideEffect(logged(TwoCells, before = 1, after = 2))
                 skipItems(1)
                 viewModel.logPushUps(1)
                 expectNoItems()
@@ -185,7 +185,7 @@ class MapViewModelTest {
         }
 
     @Test
-    fun `a Log that leaves Cells empty emits no Completion`() =
+    fun `a Log that leaves Cells empty emits only its own outcome`() =
         runTest {
             val viewModel = mapViewModel()
 
@@ -193,7 +193,7 @@ class MapViewModelTest {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
-                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0)))
+                expectSideEffect(logged(TwoCells, before = 0, after = 1))
                 skipItems(1)
                 expectNoItems()
                 collecting.cancel()
@@ -215,6 +215,20 @@ class MapViewModelTest {
         }
 
     @Test
+    fun `a Log of nothing emits nothing`() =
+        runTest {
+            val viewModel = mapViewModel()
+
+            viewModel.testWithInternalState(this) {
+                val collecting = runOnCreate()
+                skipItems(1)
+                viewModel.logPushUps(0)
+                expectNoItems()
+                collecting.cancel()
+            }
+        }
+
+    @Test
     fun `a Log fills the Map it was given and leaves another Map untouched`() =
         runTest {
             val repository = FakeMapRepository()
@@ -224,7 +238,7 @@ class MapViewModelTest {
                 val collecting = runOnCreate()
                 skipItems(1)
                 viewModel.logPushUps(1)
-                expectSideEffect(MapEvent.LogFilled(orderIndexes = listOf(0)))
+                expectSideEffect(logged(OtherTwoCells, before = 0, after = 1))
                 skipItems(1)
                 collecting.cancel()
             }

@@ -24,14 +24,14 @@ private val PieceOutlineWidth = 0.5.dp
 
 /**
  * The Completion confetti across the whole screen. It never takes touches, and it draws nothing
- * until [completion] fires.
+ * until [playback] fires it.
  */
 @Composable
-internal fun ConfettiOverlay(completion: CompletionState, modifier: Modifier = Modifier) {
+internal fun ConfettiOverlay(playback: LogPlayback, modifier: Modifier = Modifier) {
     // Each piece is a Cell cut out of the sheet, grid line and all, so white pieces show on light paper.
     val outline = LocalNotebookPalette.current.gridLine
-    Canvas(modifier = modifier.onSizeChanged { completion.screenSize = it.toSize() }) {
-        completion.confetti?.let { drawConfetti(it, outline) }
+    Canvas(modifier = modifier.onSizeChanged { playback.screenSize = it.toSize() }) {
+        playback.confetti?.let { drawConfetti(it, outline) }
     }
 }
 

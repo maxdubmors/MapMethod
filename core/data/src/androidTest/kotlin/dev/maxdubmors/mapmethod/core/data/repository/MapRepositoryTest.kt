@@ -8,6 +8,7 @@ import dev.maxdubmors.mapmethod.core.data.catalogue.MapCatalogue
 import dev.maxdubmors.mapmethod.core.database.InMemoryMapDatabase
 import dev.maxdubmors.mapmethod.core.model.Cell
 import dev.maxdubmors.mapmethod.core.model.Flag
+import dev.maxdubmors.mapmethod.core.model.LogOutcome
 import dev.maxdubmors.mapmethod.core.model.MapDefinition
 import dev.maxdubmors.mapmethod.core.model.MapId
 import dev.maxdubmors.mapmethod.core.model.MapWithProgress
@@ -37,6 +38,9 @@ class MapRepositoryTest {
     private fun TestScope.repository(catalogue: MapCatalogue = MapCatalogue.Default): MapRepository =
         DefaultMapRepository(database.mapProgressDao, catalogue, backgroundScope)
 
+    private fun outcome(map: MapDefinition, before: Int, after: Int) =
+        LogOutcome(MapWithProgress(map, filledCount = before), MapWithProgress(map, filledCount = after))
+
     @After
     fun closeDatabase() {
         database.close()
@@ -52,12 +56,12 @@ class MapRepositoryTest {
         }
 
     @Test
-    fun aLogFillsTheNextCellsAndReturnsTheirFillOrderIndexes() =
+    fun aLogFillsTheNextCellsAndReturnsTheMapBeforeAndAfter() =
         runTest {
             val repository = repository()
 
-            assertEquals(listOf(0, 1, 2), repository.log(FranceMapId, 3))
-            assertEquals(listOf(3, 4), repository.log(FranceMapId, 2))
+            assertEquals(outcome(France, before = 0, after = 3), repository.log(FranceMapId, 3))
+            assertEquals(outcome(France, before = 3, after = 5), repository.log(FranceMapId, 2))
             assertEquals(5, repository.observeMap(FranceMapId).first().filledCount)
         }
 
@@ -70,42 +74,44 @@ class MapRepositoryTest {
                     repository.observeMap(FranceMapId).first { it.filledCount == 3 }
                 }
 
-            val filled = repository.log(FranceMapId, 3)
+            val outcome = repository.log(FranceMapId, 3)
 
-            assertEquals(listOf(0, 1, 2), filled)
+            assertEquals(outcome(France, before = 0, after = 3), outcome)
             assertEquals(MapWithProgress(France, filledCount = 3), filledThree.await())
         }
 
     @Test
-    fun aLogLargerThanWhatIsLeftClampsAndReturnsOnlyThoseCells() =
+    fun aLogLargerThanWhatIsLeftClampsAndCompletesTheMap() =
         runTest {
             val repository = repository()
             repository.log(FranceMapId, 97)
 
-            assertEquals(listOf(97, 98, 99), repository.log(FranceMapId, 5))
+            val outcome = repository.log(FranceMapId, 5)
+            assertEquals(outcome(France, before = 97, after = 100), outcome)
+            assertTrue(outcome.completesMap)
             val france = repository.observeMap(FranceMapId).first()
             assertEquals(100, france.filledCount)
             assertTrue(france.isComplete)
         }
 
     @Test
-    fun aLogOnACompleteMapReturnsNothing() =
+    fun aLogOnACompleteMapLeavesItAsItIs() =
         runTest {
             val repository = repository()
             repository.log(FranceMapId, 100)
 
-            assertEquals(emptyList<Int>(), repository.log(FranceMapId, 1))
+            assertEquals(outcome(France, before = 100, after = 100), repository.log(FranceMapId, 1))
             assertEquals(100, repository.observeMap(FranceMapId).first().filledCount)
         }
 
     @Test
-    fun aNonPositiveLogReturnsNothing() =
+    fun aNonPositiveLogLeavesTheMapAsItIs() =
         runTest {
             val repository = repository()
             repository.log(FranceMapId, 4)
 
-            assertEquals(emptyList<Int>(), repository.log(FranceMapId, 0))
-            assertEquals(emptyList<Int>(), repository.log(FranceMapId, -3))
+            assertEquals(outcome(France, before = 4, after = 4), repository.log(FranceMapId, 0))
+            assertEquals(outcome(France, before = 4, after = 4), repository.log(FranceMapId, -3))
             assertEquals(4, repository.observeMap(FranceMapId).first().filledCount)
         }
 
@@ -116,7 +122,7 @@ class MapRepositoryTest {
             repository.log(FranceMapId, 60)
 
             assertEquals(MapWithProgress(twoCellMap, filledCount = 0), repository.observeMap(twoCellMap.id).first())
-            assertEquals(listOf(0, 1), repository.log(twoCellMap.id, 5))
+            assertEquals(outcome(twoCellMap, before = 0, after = 2), repository.log(twoCellMap.id, 5))
             assertEquals(60, repository.observeMap(FranceMapId).first().filledCount)
         }
 

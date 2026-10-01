@@ -13,18 +13,15 @@ public fun EntryProviderScope<NavKey>.mapEntry(onBack: () -> Unit) {
     entry<MapNavKey> { key ->
         val viewModel = hiltViewModel<MapViewModel, MapViewModel.Factory> { factory -> factory.create(key) }
         val state by viewModel.collectAsState()
-        val cascade = rememberLogCascadeState(state)
-        val completion = rememberCompletionState(state)
+        val playback = rememberLogPlayback(state)
         viewModel.collectSideEffect { event ->
             when (event) {
-                is MapEvent.LogFilled -> cascade.play(event.orderIndexes)
-                MapEvent.Completion -> completion.play(cascade)
+                is MapEvent.Logged -> playback.play(event.outcome)
             }
         }
         MapScreen(
             state = state,
-            cascade = cascade,
-            completion = completion,
+            playback = playback,
             onLogCount = viewModel::logPushUps,
             onBack = onBack,
         )
