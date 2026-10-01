@@ -26,5 +26,5 @@ public data class MapUiState(
     public val remaining: Int get() = if (isLoaded) totalCount - filledCount else 0
 
     /** Completion: every Cell of a loaded Map is filled. */
-    public val isComplete: Boolean get() = isLoaded && (filledCount == totalCount)
+    public val isComplete: Boolean get() = isLoaded && map.isComplete
 }

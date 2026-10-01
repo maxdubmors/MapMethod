@@ -1,5 +1,6 @@
 package dev.maxdubmors.mapmethod.core.data.repository
 
+import dev.maxdubmors.mapmethod.core.model.LogOutcome
 import dev.maxdubmors.mapmethod.core.model.MapDefinition
 import dev.maxdubmors.mapmethod.core.model.MapId
 import dev.maxdubmors.mapmethod.core.model.MapWithProgress
@@ -29,9 +30,8 @@ public interface MapRepository {
     public fun loadedMap(id: MapId): MapWithProgress?
 
     /**
-     * A Log of [count] on the Map [id]: fills up to [count] of its next empty Cells. Returns the fill
-     * order indexes it newly filled, in fill order; none when [count] is not positive or the Map is
-     * complete.
+     * A Log of [count] on the Map [id]: fills up to [count] of its next empty Cells. Returns the Map
+     * before and after it; the two are the same when [count] is not positive or the Map is complete.
      */
-    public suspend fun log(id: MapId, count: Int): List<Int>
+    public suspend fun log(id: MapId, count: Int): LogOutcome
 }

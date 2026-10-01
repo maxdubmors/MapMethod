@@ -17,8 +17,10 @@ public fun EntryProviderScope<NavKey>.mapEntry(onBack: () -> Unit) {
         val completion = rememberCompletionState(state)
         viewModel.collectSideEffect { event ->
             when (event) {
-                is MapEvent.LogFilled -> cascade.play(event.orderIndexes)
-                MapEvent.Completion -> completion.play(cascade)
+                is MapEvent.Logged -> {
+                    cascade.play(event.outcome.filledCells.map { it.orderIndex })
+                    if (event.outcome.completesMap) completion.play(cascade)
+                }
             }
         }
         MapScreen(
