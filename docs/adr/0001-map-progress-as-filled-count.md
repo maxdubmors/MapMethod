@@ -10,3 +10,5 @@ Cells fill in a fixed fill order and every Map's mask lives in code, so the only
 ## Consequences
 
 Painting, which keeps each Cell's exact pencil coverage, will need its own storage for strokes; this schema deliberately does not anticipate it.
+
+A Map whose mask later loses Cells can be left with a stored count past its last Cell; such a Map simply reads as complete.

@@ -54,9 +54,9 @@ internal fun MapScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val remaining = state.remaining
+    val emptyCount = state.emptyCount
     var entryText by rememberSaveable { mutableStateOf("1") }
-    val count = if (remaining < 1) null else parseLogCount(entryText, remaining)
+    val count = if (emptyCount < 1) null else parseLogCount(entryText, emptyCount)
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier =
@@ -71,7 +71,7 @@ internal fun MapScreen(
             MapCanvas(
                 state = state,
                 playback = playback,
-                previewCount = count,
+                previewCount = state.previewCount(count),
                 modifier =
                     Modifier
                         .weight(1f)
@@ -81,7 +81,7 @@ internal fun MapScreen(
             MapProgress(state = state, modifier = Modifier.fillMaxWidth())
             LogControls(
                 count = count,
-                remaining = remaining,
+                emptyCount = emptyCount,
                 entryText = entryText,
                 onEntryTextChange = { entryText = it },
                 onLogCount = onLogCount,
@@ -107,27 +107,18 @@ private fun BackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 private fun MapCanvas(
     state: MapUiState,
     playback: LogPlayback,
-    previewCount: Int?,
+    previewCount: Int,
     modifier: Modifier = Modifier,
 ) {
     var scale by rememberSaveable { mutableFloatStateOf(MinZoom) }
     var offsetX by rememberSaveable { mutableFloatStateOf(0f) }
     var offsetY by rememberSaveable { mutableFloatStateOf(0f) }
     var viewport by remember { mutableStateOf(Size.Zero) }
-    val cells = state.cells
     val rows = state.map.definition.rows
     val cols = state.map.definition.cols
     val palette = LocalNotebookPalette.current
     val notebookCells =
-        remember(state, previewCount, palette) {
-            mapCells(
-                map = state.map,
-                palette = palette,
-                // No Cell is next until the progress is read.
-                preview =
-                    if (state.isLoaded) previewOrderIndexes(cells, state.filledCount, previewCount) else emptySet(),
-            )
-        }
+        remember(state.map, previewCount, palette) { mapCells(state.map, palette, previewCount) }
     val transform =
         rememberTransformableState { _, zoomChange, panChange, _ ->
             scale = (scale * zoomChange).coerceIn(MinZoom, MaxZoom)

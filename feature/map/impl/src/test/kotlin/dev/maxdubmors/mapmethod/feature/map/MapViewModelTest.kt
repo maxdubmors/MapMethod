@@ -22,7 +22,7 @@ import org.orbitmvi.orbit.test.testWithInternalState
 private val TwoCells =
     MapDefinition(
         id = MapId("two"),
-        cells = listOf(Cell(orderIndex = 0, row = 0, col = 0), Cell(orderIndex = 1, row = 0, col = 1)),
+        cells = listOf(Cell(row = 0, col = 0), Cell(row = 0, col = 1)),
         flag = Flag(bands = listOf(0xFF000001.toInt(), 0xFF000002.toInt())),
     )
 

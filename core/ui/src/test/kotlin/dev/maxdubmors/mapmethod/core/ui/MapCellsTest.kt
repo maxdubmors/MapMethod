@@ -22,12 +22,12 @@ class MapCellsTest {
     private val threeBands =
         MapDefinition(
             id = MapId("three"),
-            cells = List(3) { Cell(orderIndex = it, row = it, col = it) },
+            cells = List(3) { Cell(row = it, col = it) },
             flag = Flag(bands = listOf(west, middle, east).map { it.toArgb() }),
         )
 
-    private fun marks(filledCount: Int, preview: Set<Int> = emptySet()) =
-        mapCells(MapWithProgress(threeBands, filledCount), palette, preview).map { it.mark }
+    private fun marks(filledCount: Int, previewCount: Int = 0) =
+        mapCells(MapWithProgress(threeBands, filledCount), palette, previewCount).map { it.mark }
 
     @Test
     fun `filled Cells are graphite in every band while the Map is in progress`() {
@@ -55,10 +55,10 @@ class MapCellsTest {
     }
 
     @Test
-    fun `previewed Cells are outlined and the other empty Cells are tinted`() {
+    fun `the next Cells are outlined and the other empty Cells are tinted`() {
         assertEquals(
             listOf(CellMark.Filled(palette.graphite), CellMark.Preview, CellMark.Empty),
-            marks(filledCount = 1, preview = setOf(1)),
+            marks(filledCount = 1, previewCount = 1),
         )
     }
 
@@ -70,14 +70,17 @@ class MapCellsTest {
     }
 
     @Test
-    fun `a filled Cell is never outlined`() {
-        assertEquals(CellMark.Filled(palette.graphite), marks(filledCount = 1, preview = setOf(0)).first())
+    fun `a preview outlines no more Cells than are empty`() {
+        assertEquals(
+            listOf(CellMark.Filled(palette.graphite), CellMark.Preview, CellMark.Preview),
+            marks(filledCount = 1, previewCount = 5),
+        )
     }
 
     @Test
     fun `flag bands split by the Map's own columns`() {
         // Six columns over three bands: two columns each, the grid measured from the Cells themselves.
-        val sixCols = threeBands.copy(cells = List(6) { Cell(orderIndex = it, row = 0, col = it) })
+        val sixCols = threeBands.copy(cells = List(6) { Cell(row = 0, col = it) })
 
         assertEquals(
             listOf(west, west, middle, middle, east, east).map { CellMark.Filled(it) },

@@ -11,9 +11,9 @@ class LogOutcomeTest {
             id = MapId("three"),
             cells =
                 listOf(
-                    Cell(orderIndex = 0, row = 0, col = 1),
-                    Cell(orderIndex = 1, row = 1, col = 0),
-                    Cell(orderIndex = 2, row = 1, col = 1),
+                    Cell(row = 0, col = 1),
+                    Cell(row = 1, col = 0),
+                    Cell(row = 1, col = 1),
                 ),
             flag = Flag(bands = listOf(0xFF000000.toInt())),
         )
@@ -26,7 +26,7 @@ class LogOutcomeTest {
         val outcome = outcome(before = 1, after = 3)
 
         assertEquals(
-            listOf(Cell(orderIndex = 1, row = 1, col = 0), Cell(orderIndex = 2, row = 1, col = 1)),
+            listOf(Cell(row = 1, col = 0), Cell(row = 1, col = 1)),
             outcome.filledCells,
         )
         assertTrue(outcome.completesMap)
@@ -36,7 +36,7 @@ class LogOutcomeTest {
     fun `a Log that leaves Cells empty fills its Cells without Completion`() {
         val outcome = outcome(before = 0, after = 1)
 
-        assertEquals(listOf(Cell(orderIndex = 0, row = 0, col = 1)), outcome.filledCells)
+        assertEquals(listOf(Cell(row = 0, col = 1)), outcome.filledCells)
         assertFalse(outcome.completesMap)
     }
 

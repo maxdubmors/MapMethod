@@ -37,7 +37,7 @@ private val FlagRed = Color(0xFFFF0000)
 private val FiveCells =
     MapDefinition(
         id = MapId("five"),
-        cells = List(5) { Cell(orderIndex = it, row = 0, col = it) },
+        cells = List(5) { Cell(row = 0, col = it) },
         flag = Flag(bands = listOf(0xFFFF0000.toInt())),
     )
 

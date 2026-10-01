@@ -45,15 +45,15 @@ private val LogIconSpacing = 8.dp
 @Composable
 internal fun LogControls(
     count: Int?,
-    remaining: Int,
+    emptyCount: Int,
     entryText: String,
     onEntryTextChange: (String) -> Unit,
     onLogCount: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val enabled = remaining > 0
+    val enabled = emptyCount > 0
     val stepBy = { amount: Int ->
-        onEntryTextChange(stepLogCount(current = count, step = amount, remaining = remaining).toString())
+        onEntryTextChange(stepLogCount(current = count, step = amount, emptyCount = emptyCount).toString())
     }
     Column(
         modifier = modifier,
@@ -75,7 +75,7 @@ internal fun LogControls(
             OutlinedTextField(
                 value = entryText,
                 onValueChange = { typed ->
-                    if (typed.all(Char::isDigit)) onEntryTextChange(clampEntryText(typed, entryText, remaining))
+                    if (typed.all(Char::isDigit)) onEntryTextChange(clampEntryText(typed, entryText, emptyCount))
                 },
                 label = { Text(text = stringResource(R.string.feature_map_impl_log_count_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

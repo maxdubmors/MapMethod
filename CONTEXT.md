@@ -9,8 +9,8 @@ A grid representation of a country together with the user's progress on it; one 
 _Avoid_: board, drawing, level, map template
 
 **Cell**:
-The smallest fillable unit of the Map; Cells fill in a fixed fill order, and the next ones to be filled are previewed.
-_Avoid_: tile, square, pixel
+The smallest fillable unit of the Map, either filled or empty; Cells fill in a fixed fill order, and the next empty ones are previewed.
+_Avoid_: tile, square, pixel; remaining or left (for an empty Cell)
 
 **Activity**:
 What the user counts to earn Cells, such as push-ups or kilometres run.

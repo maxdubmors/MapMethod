@@ -203,7 +203,7 @@ internal fun rememberLogPlayback(state: MapUiState): LogPlayback {
             scope = scope,
             haptics = haptics,
             isReducedMotion = ::isReducedMotion,
-            filledCount = { currentState.value.filledCount },
+            filledCount = { currentState.value.map.filledCount },
             graphite = { graphite.value },
         )
     }
