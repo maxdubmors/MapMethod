@@ -13,11 +13,11 @@ internal val CellRecolourMillis = 250L
 /**
  * One Cell of the Completion wave.
  *
- * @property orderIndex the Cell's fill order index.
+ * @property position the Cell's position in fill order.
  * @property delayMillis when the Cell starts turning into its flag colour, counted from the start of the wave.
  */
 internal data class WaveRecolour(
-    val orderIndex: Int,
+    val position: Int,
     val delayMillis: Long,
 )
 
@@ -25,12 +25,12 @@ internal data class WaveRecolour(
  * The Completion wave: the Map's Cells turn from graphite into the flag colours one after another
  * in fill order, spread evenly over about one second.
  */
-internal fun completionWave(orderIndexes: List<Int>): List<WaveRecolour> {
-    val ordered = orderIndexes.sorted()
+internal fun completionWave(positions: List<Int>): List<WaveRecolour> {
+    val ordered = positions.sorted()
     val gaps = (ordered.size - 1).coerceAtLeast(1).toLong()
     val span = WaveMillis - CellRecolourMillis
-    return ordered.mapIndexed { position, orderIndex ->
-        WaveRecolour(orderIndex = orderIndex, delayMillis = position * span / gaps)
+    return ordered.mapIndexed { step, position ->
+        WaveRecolour(position = position, delayMillis = step * span / gaps)
     }
 }
 

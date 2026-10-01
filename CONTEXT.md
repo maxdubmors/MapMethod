@@ -24,6 +24,10 @@ _Avoid_: price, cost, ratio
 A manual record of an amount of Activity that fills the next empty Cells.
 _Avoid_: achievement, workout, set
 
+**Cascade**:
+The Cells a Log just filled stamping onto the Map one after another in fill order; it plays every Log, and when that Log brings Completion, Completion follows once the Cascade ends.
+_Avoid_: fill animation, stamp sequence
+
 **Painting**:
 Filling a single Cell by hand-shading it in pencil with a finger; the Cell keeps exactly the coverage it was painted with, gaps and strokes over its edge included.
 _Avoid_: coloring, drawing, shading

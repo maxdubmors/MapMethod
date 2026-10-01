@@ -15,7 +15,7 @@ class CompletionWaveTest {
     fun `Cells recolour in fill order`() {
         val wave = completionWave(listOf(2, 0, 3, 1))
 
-        assertEquals(listOf(0, 1, 2, 3), wave.map { it.orderIndex })
+        assertEquals(listOf(0, 1, 2, 3), wave.map { it.position })
         val delays = wave.map { it.delayMillis }
         assertEquals(delays.sorted(), delays)
         assertTrue("delays $delays", delays.first() < delays.last())
