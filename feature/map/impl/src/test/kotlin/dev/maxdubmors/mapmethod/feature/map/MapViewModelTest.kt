@@ -215,6 +215,20 @@ class MapViewModelTest {
         }
 
     @Test
+    fun `a Log of nothing emits nothing`() =
+        runTest {
+            val viewModel = mapViewModel()
+
+            viewModel.testWithInternalState(this) {
+                val collecting = runOnCreate()
+                skipItems(1)
+                viewModel.logPushUps(0)
+                expectNoItems()
+                collecting.cancel()
+            }
+        }
+
+    @Test
     fun `a Log fills the Map it was given and leaves another Map untouched`() =
         runTest {
             val repository = FakeMapRepository()

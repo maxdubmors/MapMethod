@@ -80,7 +80,7 @@ private class Harness(scope: TestScope, filledCount: Int, reducedMotion: Boolean
             haptics = haptics,
             isReducedMotion = { reducedMotion },
             filledCount = { stateFilledCount.intValue },
-            graphite = Graphite,
+            graphite = { Graphite },
         ).apply { screenSize = Size(1_000f, 2_000f) }
 
     /** What the Map shows now. */
@@ -232,5 +232,23 @@ class LogPlaybackTest {
                 stampClock.playTimeMillis(0) - beforeBackground <= MaxFrameMillis,
             )
             assertTrue("still playing", harness.playback.stampClock != null)
+        }
+
+    @Test
+    fun `time in the background never throws the wave ahead`() =
+        runTest {
+            val harness = Harness(this, filledCount = 4)
+            harness.playback.play(outcome(before = 4, after = 5))
+            harness.stateShows(5)
+            while (harness.frame().firstCellColour == Graphite) {
+                advanceTimeBy(FrameMillis)
+                runCurrent()
+            }
+
+            harness.clock.background(5_000)
+            advanceTimeBy(FrameMillis)
+            runCurrent()
+
+            assertTrue("the wave still plays", harness.playback.recolour != null)
         }
 }

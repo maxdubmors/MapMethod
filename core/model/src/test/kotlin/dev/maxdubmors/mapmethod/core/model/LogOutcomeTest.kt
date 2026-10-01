@@ -47,4 +47,12 @@ class LogOutcomeTest {
         assertEquals(emptyList(), outcome.filledCells)
         assertFalse(outcome.completesMap)
     }
+
+    @Test
+    fun `progress stored past a Map's last Cell fills nothing`() {
+        val outcome = outcome(before = 5, after = 3)
+
+        assertEquals(emptyList(), outcome.filledCells)
+        assertFalse(outcome.completesMap)
+    }
 }

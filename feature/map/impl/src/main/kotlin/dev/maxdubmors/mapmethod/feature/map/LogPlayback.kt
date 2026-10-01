@@ -50,7 +50,7 @@ internal class LogPlayback(
     private val haptics: HapticFeedback,
     private val isReducedMotion: () -> Boolean,
     private val filledCount: () -> Int,
-    private val graphite: Color,
+    private val graphite: () -> Color,
 ) {
     /** When each Cell of the grid stamps; null when no Cascade plays. Read it only while drawing. */
     var stampClock: StampClock? by mutableStateOf(null)
@@ -77,8 +77,9 @@ internal class LogPlayback(
 
     /** Plays the Log's [outcome]; playback still running ends at once. */
     fun play(outcome: LogOutcome) {
-        val positions = outcome.before.filledCount until outcome.after.filledCount
-        if (positions.isEmpty()) return
+        val filledCells = outcome.filledCells
+        if (filledCells.isEmpty()) return
+        val positions = outcome.before.filledCount until (outcome.before.filledCount + filledCells.size)
         val reducedMotion = isReducedMotion()
         val wave =
             if (outcome.completesMap && !reducedMotion) completionWave(outcome.after.cells.indices.toList()) else null
@@ -93,18 +94,18 @@ internal class LogPlayback(
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     return@launch
                 }
-                playCascade(cascadeSchedule(positions.toList()), shownOnceFilled = outcome.after.filledCount)
+                playCascade(cascadeSchedule(positions.toList()), awaitedFilledCount = outcome.after.filledCount)
                 if ((wave != null) && (waveRecolour != null)) {
                     playCompletion(wave, waveRecolour, outcome.after.definition.flag)
                 }
             }
     }
 
-    private suspend fun playCascade(cascade: List<CascadeStamp>, shownOnceFilled: Int) {
+    private suspend fun playCascade(cascade: List<CascadeStamp>, awaitedFilledCount: Int) {
         stampClock = cascadeClock(cascade)
         try {
             // The event can arrive before the Map's state shows the Cells filled; until then they wait hidden.
-            snapshotFlow { filledCount() }.first { it >= shownOnceFilled }
+            snapshotFlow { filledCount() }.first { it >= awaitedFilledCount }
             runCascade(cascade)
             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
         } finally {
@@ -115,12 +116,7 @@ internal class LogPlayback(
 
     private suspend fun playCompletion(wave: List<WaveRecolour>, waveRecolour: CellRecolour, flag: Flag) {
         try {
-            var elapsed = 0L
-            playFrames { frameMillis ->
-                elapsed += frameMillis
-                waveElapsedMillis = elapsed
-                elapsed < wave.waveDurationMillis()
-            }
+            playTimeline(wave.waveDurationMillis()) { elapsed -> waveElapsedMillis = elapsed }
         } finally {
             // A later Completion may already hold the Map; only this wave lets go of it.
             if (recolour === waveRecolour) recolour = null
@@ -143,7 +139,7 @@ internal class LogPlayback(
     private fun waveRecolour(wave: List<WaveRecolour>): CellRecolour =
         CellRecolour { index, color ->
             val delay = wave.getOrNull(index)?.delayMillis ?: 0L
-            lerp(graphite, color, recolourFraction(waveElapsedMillis - delay))
+            lerp(graphite(), color, recolourFraction(waveElapsedMillis - delay))
         }
 
     private fun cascadeClock(cascade: List<CascadeStamp>): StampClock {
@@ -158,17 +154,24 @@ internal class LogPlayback(
         val duration = cascade.durationMillis()
         val ticks = cascade.filter { it.hasTick }.map { it.delayMillis }
         var nextTick = 0
-        var elapsed = 0L
-        playFrames { frameMillis ->
-            elapsed += frameMillis
+        playTimeline(duration) { elapsed ->
             cascadeElapsedMillis = elapsed
             // Cells too close together to feel apart share one tick.
             if ((nextTick < ticks.size) && (ticks[nextTick] <= elapsed)) {
                 haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
                 while ((nextTick < ticks.size) && (ticks[nextTick] <= elapsed)) nextTick++
             }
-            elapsed < duration
         }
+    }
+}
+
+/** Calls [onElapsed] with the time played so far on each frame, from zero until [durationMillis] has played. */
+private suspend fun playTimeline(durationMillis: Long, onElapsed: (elapsedMillis: Long) -> Unit) {
+    var elapsed = 0L
+    playFrames { frameMillis ->
+        elapsed += frameMillis
+        onElapsed(elapsed)
+        elapsed < durationMillis
     }
 }
 
@@ -192,15 +195,16 @@ private suspend fun playFrames(onFrame: (frameMillis: Long) -> Boolean) {
 internal fun rememberLogPlayback(state: MapUiState): LogPlayback {
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    val graphite = LocalNotebookPalette.current.graphite
+    // Read through state, so a theme change recolours the wave without dropping the playback that holds it.
+    val graphite = rememberUpdatedState(LocalNotebookPalette.current.graphite)
     val currentState = rememberUpdatedState(state)
-    return remember(scope, haptics, graphite) {
+    return remember(scope, haptics) {
         LogPlayback(
             scope = scope,
             haptics = haptics,
             isReducedMotion = ::isReducedMotion,
             filledCount = { currentState.value.filledCount },
-            graphite = graphite,
+            graphite = { graphite.value },
         )
     }
 }

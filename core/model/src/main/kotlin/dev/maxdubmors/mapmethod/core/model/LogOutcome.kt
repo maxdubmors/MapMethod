@@ -6,7 +6,7 @@ public data class LogOutcome(
     val after: MapWithProgress,
 ) {
     /** The Cells the Log newly filled, in fill order. */
-    public val filledCells: List<Cell> get() = after.cells.subList(before.filledCount, after.filledCount)
+    public val filledCells: List<Cell> get() = after.cells.take(after.filledCount).drop(before.filledCount)
 
     /** Completion: the Log filled the Map's last Cell. */
     public val completesMap: Boolean get() = !before.isComplete && after.isComplete
